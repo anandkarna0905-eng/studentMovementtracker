@@ -1,3 +1,4 @@
+
 export type Location = {
   lat: number;
   lng: number;
@@ -41,6 +42,10 @@ export type BreachAlert = {
 };
 
 export type Geofence = {
+  id: string;
+  name: string;
   center: Location;
   radius: number; // in meters
 };
+
+    

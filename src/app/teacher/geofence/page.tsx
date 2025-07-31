@@ -11,54 +11,92 @@ import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { Circle } from '@/components/circle';
 import { Pin } from '@/components/pin';
 import type { Geofence } from '@/types';
-import { LocateFixed, LogOut, ArrowLeft } from 'lucide-react';
+import { LocateFixed, LogOut, ArrowLeft, Trash2, Edit, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 
 const INITIAL_GEOFENCE: Geofence = {
+  id: 'new',
+  name: '',
   center: { lat: 34.0522, lng: -118.2437 }, // Downtown LA
   radius: 100, // 100 meters
 };
 
+const MOCK_SAVED_LOCATIONS: Geofence[] = [
+    { id: 'loc1', name: 'Main Campus', center: { lat: 34.0522, lng: -118.2437 }, radius: 200 },
+    { id: 'loc2', name: 'Sports Complex', center: { lat: 34.06, lng: -118.25 }, radius: 150 },
+]
+
 export default function GeofencePage() {
-  const [geofence, setGeofence] = useState<Geofence>(INITIAL_GEOFENCE);
+  const [currentGeofence, setCurrentGeofence] = useState<Geofence>(INITIAL_GEOFENCE);
+  const [savedLocations, setSavedLocations] = useState<Geofence[]>(MOCK_SAVED_LOCATIONS);
   const [year, setYear] = useState<number | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   useEffect(() => {
     setYear(new Date().getFullYear());
-    // You might fetch the current geofence from your backend here
   }, []);
+  
+  const handleSelectLocation = (location: Geofence) => {
+    setCurrentGeofence(location);
+  };
 
   const handleRadiusChange = (value: number[]) => {
-    setGeofence(g => ({ ...g, radius: value[0] }));
+    setCurrentGeofence(g => ({ ...g, radius: value[0] }));
   };
 
   const handleCenterChange = (e: google.maps.MapMouseEvent) => {
     if (e.latLng) {
-      setGeofence(g => ({ ...g, center: e.latLng!.toJSON() }));
+      setCurrentGeofence(g => ({ ...g, center: e.latLng!.toJSON() }));
     }
   };
 
   const handleLatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const lat = parseFloat(e.target.value);
     if (!isNaN(lat)) {
-      setGeofence(g => ({ ...g, center: { ...g.center, lat } }));
+      setCurrentGeofence(g => ({ ...g, center: { ...g.center, lat } }));
     }
   };
 
   const handleLngChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const lng = parseFloat(e.target.value);
     if (!isNaN(lng)) {
-      setGeofence(g => ({ ...g, center: { ...g.center, lng } }));
+      setCurrentGeofence(g => ({ ...g, center: { ...g.center, lng } }));
     }
+  };
+  
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentGeofence(g => ({ ...g, name: e.target.value }));
   };
 
   const handleSave = () => {
-    // Here you would save the geofence to your backend
-    console.log('Saving geofence:', geofence);
-    alert('Geofence saved!');
+    if (!currentGeofence.name) {
+        alert('Please provide a name for the location.');
+        return;
+    }
+    if (currentGeofence.id === 'new') {
+        const newLocation = { ...currentGeofence, id: `loc-${Date.now()}`};
+        setSavedLocations(prev => [...prev, newLocation]);
+        alert(`Location "${newLocation.name}" saved!`);
+    } else {
+        setSavedLocations(prev => prev.map(loc => loc.id === currentGeofence.id ? currentGeofence : loc));
+        alert(`Location "${currentGeofence.name}" updated!`);
+    }
+    setCurrentGeofence(INITIAL_GEOFENCE);
   };
   
+  const handleDelete = (locationId: string) => {
+    if (confirm('Are you sure you want to delete this location?')) {
+        setSavedLocations(prev => prev.filter(loc => loc.id !== locationId));
+        if (currentGeofence.id === locationId) {
+            setCurrentGeofence(INITIAL_GEOFENCE);
+        }
+    }
+  }
+  
+  const handleAddNew = () => {
+    setCurrentGeofence(INITIAL_GEOFENCE);
+  }
+
   if (year === null) return null;
 
   return (
@@ -84,12 +122,53 @@ export default function GeofencePage() {
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
         </Link>
+
+        <Card className="mb-8 shadow-lg">
+            <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                    Saved Locations
+                    <Button variant="outline" size="sm" onClick={handleAddNew}>
+                        <PlusCircle className="mr-2 h-4 w-4"/>
+                        Add New
+                    </Button>
+                </CardTitle>
+                <CardDescription>
+                    Manage your saved geofence locations. Select one to edit or view it on the map.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-4">
+                    {savedLocations.map(location => (
+                        <Card key={location.id} className={`flex items-center justify-between p-4 ${currentGeofence.id === location.id ? 'border-primary' : ''}`}>
+                            <div>
+                                <h3 className="font-semibold">{location.name}</h3>
+                                <p className="text-sm text-muted-foreground">Radius: {location.radius}m</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button variant="outline" size="icon" onClick={() => handleSelectLocation(location)}>
+                                    <Edit className="h-4 w-4"/>
+                                    <span className="sr-only">Edit</span>
+                                </Button>
+                                <Button variant="destructive" size="icon" onClick={() => handleDelete(location.id)}>
+                                    <Trash2 className="h-4 w-4"/>
+                                    <span className="sr-only">Delete</span>
+                                </Button>
+                            </div>
+                        </Card>
+                    ))}
+                    {savedLocations.length === 0 && (
+                        <p className="text-muted-foreground text-center py-4">No saved locations yet.</p>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 h-[60vh] lg:h-auto">
                 {apiKey ? (
                     <APIProvider apiKey={apiKey}>
                         <Map
-                            center={geofence.center}
+                            center={currentGeofence.center}
                             zoom={15}
                             mapId="geofence-map"
                             className="w-full h-full rounded-lg shadow-lg"
@@ -98,15 +177,15 @@ export default function GeofencePage() {
                             onClick={handleCenterChange}
                         >
                             <Circle
-                                center={geofence.center}
-                                radius={geofence.radius}
+                                center={currentGeofence.center}
+                                radius={currentGeofence.radius}
                                 strokeColor="hsl(var(--accent))"
                                 strokeOpacity={0.8}
                                 strokeWeight={2}
                                 fillColor="hsl(var(--accent))"
                                 fillOpacity={0.25}
                             />
-                             <AdvancedMarker position={geofence.center} title={'Geofence Center'}>
+                             <AdvancedMarker position={currentGeofence.center} title={'Geofence Center'}>
                                  <Pin
                                     background={'hsl(var(--accent))'}
                                     borderColor={'hsl(var(--accent-foreground))'}
@@ -124,18 +203,22 @@ export default function GeofencePage() {
             <div className="lg:col-span-1">
                 <Card className="shadow-lg">
                     <CardHeader>
-                        <CardTitle className="font-headline text-xl">Set Geofence Boundary</CardTitle>
+                        <CardTitle className="font-headline text-xl">{currentGeofence.id === 'new' ? 'Add New Geofence' : `Editing: ${currentGeofence.name}`}</CardTitle>
                         <CardDescription>Click on the map to set the center and use the controls below to adjust the boundary.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                         <div className="space-y-2">
+                            <Label htmlFor="name">Location Name</Label>
+                            <Input id="name" type="text" value={currentGeofence.name} onChange={handleNameChange} placeholder="e.g., Main Campus" />
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="lat">Latitude</Label>
-                                <Input id="lat" type="number" value={geofence.center.lat} onChange={handleLatChange} />
+                                <Input id="lat" type="number" value={currentGeofence.center.lat} onChange={handleLatChange} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="lng">Longitude</Label>
-                                <Input id="lng" type="number" value={geofence.center.lng} onChange={handleLngChange} />
+                                <Input id="lng" type="number" value={currentGeofence.center.lng} onChange={handleLngChange} />
                             </div>
                         </div>
                         <div className="space-y-2">
@@ -146,13 +229,13 @@ export default function GeofencePage() {
                                     min={50}
                                     max={1000}
                                     step={10}
-                                    value={[geofence.radius]}
+                                    value={[currentGeofence.radius]}
                                     onValueChange={handleRadiusChange}
                                 />
-                                <span className="font-mono text-lg w-24 text-center p-2 rounded-md bg-muted">{geofence.radius}m</span>
+                                <span className="font-mono text-lg w-24 text-center p-2 rounded-md bg-muted">{currentGeofence.radius}m</span>
                             </div>
                         </div>
-                         <Button onClick={handleSave} className="w-full font-bold">Save Geofence</Button>
+                         <Button onClick={handleSave} className="w-full font-bold">{currentGeofence.id === 'new' ? 'Save New Location' : 'Update Location'}</Button>
                     </CardContent>
                 </Card>
             </div>
@@ -166,3 +249,5 @@ export default function GeofencePage() {
     </div>
   );
 }
+
+    
