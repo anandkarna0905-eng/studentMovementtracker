@@ -10,15 +10,15 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { StudentCard } from '@/components/student-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Clock, Users, CheckCircle, AlertTriangle, Settings, X } from 'lucide-react';
+import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Clock, Users, CheckCircle, AlertTriangle, Settings, X, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
 
 // Mock data, in a real app this would come from a backend.
 const MOCK_STUDENTS: Student[] = [
-    { id: 'STU-001', name: 'Alice Johnson', location: { lat: 34.0522, lng: -118.2437 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:05:15' }, { time: '2023-10-27T09:01:22' }] },
-    { id: 'STU-002', name: 'Bob Williams', location: { lat: 34.0524, lng: -118.2435 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:03:00' }] },
-    { id: 'STU-003', name: 'Charlie Brown', location: { lat: 34.0599, lng: -118.2449 }, status: 'breached', lastStatusCheck: 'complete', entryLogs: [] },
-    { id: 'STU-004', name: 'Diana Miller', location: { lat: 34.0530, lng: -118.2430 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:05:15' }, { time: '2023-10-27T09:01:22' }, { time: '2023-10-28T08:59:58' }] },
+    { id: 'STU-001', name: 'Alice Johnson', email: 'alice@example.com', phone: '+11111111111', location: { lat: 34.0522, lng: -118.2437 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:05:15' }, { time: '2023-10-27T09:01:22' }] },
+    { id: 'STU-002', name: 'Bob Williams', email: 'bob@example.com', phone: '+12222222222', location: { lat: 34.0524, lng: -118.2435 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:03:00' }] },
+    { id: 'STU-003', name: 'Charlie Brown', email: 'charlie@example.com', phone: '+13333333333', location: { lat: 34.0599, lng: -118.2449 }, status: 'breached', lastStatusCheck: 'complete', entryLogs: [] },
+    { id: 'STU-004', name: 'Diana Miller', email: 'diana@example.com', phone: '+14444444444', location: { lat: 34.0530, lng: -118.2430 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:05:15' }, { time: '2023-10-27T09:01:22' }, { time: '2023-10-28T08:59:58' }] },
 ];
 
 export default function TeacherDashboardPage() {
@@ -197,12 +197,29 @@ export default function TeacherDashboardPage() {
                 <Dialog open={!!selectedStudent} onOpenChange={(open) => !open && setSelectedStudent(null)}>
                     <DialogContent className="max-w-lg">
                         <DialogHeader>
-                            <DialogTitle className="font-headline text-2xl">{selectedStudent.name}'s Entry Log</DialogTitle>
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="p-3 bg-muted rounded-full">
+                                    <User className="h-8 w-8 text-muted-foreground" />
+                                </div>
+                                <div>
+                                    <DialogTitle className="font-headline text-2xl">{selectedStudent.name}</DialogTitle>
+                                    <div className="text-sm text-muted-foreground flex flex-col gap-1 mt-1">
+                                        <div className="flex items-center gap-2">
+                                            <Mail className="h-4 w-4" />
+                                            <span>{selectedStudent.email}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Phone className="h-4 w-4" />
+                                            <span>{selectedStudent.phone}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <DialogDescription>
                                 History of when the student entered the geofence. Total entries: <Badge>{selectedStudent.entryLogs.length}</Badge>
                             </DialogDescription>
                         </DialogHeader>
-                        <ScrollArea className="h-72 mt-4">
+                        <ScrollArea className="h-60 mt-4">
                             <div className="space-y-4 pr-4">
                                 {Object.entries(groupLogsByDay(selectedStudent.entryLogs)).reverse().map(([day, logs]) => (
                                     <div key={day}>

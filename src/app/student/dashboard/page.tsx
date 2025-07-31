@@ -14,6 +14,8 @@ import Link from 'next/link';
 const MOCK_STUDENT: Student = {
     id: 'STU-001',
     name: 'Alice Johnson',
+    email: 'alice@example.com',
+    phone: '+1234567890',
     location: { lat: 34.0522, lng: -118.2437 },
     status: 'safe',
     lastStatusCheck: 'complete',

@@ -10,6 +10,8 @@ export type EntryLog = {
 export type Student = {
   id: string;
   name: string;
+  email: string;
+  phone: string;
   location: Location;
   status: 'safe' | 'breached' | 'unknown';
   lastStatusCheck: 'pending' | 'complete';
