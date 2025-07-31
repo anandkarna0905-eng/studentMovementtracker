@@ -107,134 +107,137 @@ export default function TeacherDashboardPage() {
                 </div>
             </header>
             <main className="flex-grow container mx-auto p-4 md:p-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 flex flex-col gap-8">
-                        {!selectedDate ? (
-                            <>
-                                <Card className="shadow-lg">
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2 font-headline text-xl"><CheckCircle className="text-green-600"/> Students Inside Geofence (Live)</CardTitle>
-                                        <div className="text-sm text-muted-foreground">Students currently within the designated college area. Total: <Badge>{studentsInside.length}</Badge></div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <ScrollArea className="h-64">
-                                            <div className="space-y-4">
-                                                {studentsInside.length > 0 ? studentsInside.map(student => (
-                                                    <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
-                                                )) : <p className="text-muted-foreground text-center py-8">No students are currently inside the geofence.</p>}
-                                            </div>
-                                        </ScrollArea>
-                                    </CardContent>
-                                </Card>
-                                <Card className="shadow-lg">
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2 font-headline text-xl"><AlertTriangle className="text-destructive"/> Students Outside Geofence (Live)</CardTitle>
-                                        <div className="text-sm text-muted-foreground">Students currently outside the designated college area. Total: <Badge variant="destructive">{studentsOutside.length}</Badge></div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <ScrollArea className="h-64">
-                                            <div className="space-y-4">
-                                                {studentsOutside.length > 0 ? studentsOutside.map(student => (
-                                                    <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
-                                                )) : <p className="text-muted-foreground text-center py-8">All students are currently accounted for.</p>}
-                                            </div>
-                                        </ScrollArea>
-                                    </CardContent>
-                                </Card>
-                            </>
-                        ) : (
-                             <>
-                                <Card className="shadow-lg">
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2 font-headline text-xl"><CheckCircle className="text-green-600"/> Attended Students</CardTitle>
-                                        <div className="text-sm text-muted-foreground">Students who entered the geofence on {selectedDate.toLocaleDateString()}. Total: <Badge>{attendedOnDate.length}</Badge></div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <ScrollArea className="h-64">
-                                            <div className="space-y-4">
-                                                {attendedOnDate.length > 0 ? attendedOnDate.map(student => (
-                                                    <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
-                                                )) : <p className="text-muted-foreground text-center py-8">No students attended on this day.</p>}
-                                            </div>
-                                        </ScrollArea>
-                                    </CardContent>
-                                </Card>
-                                 <Card className="shadow-lg">
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2 font-headline text-xl"><AlertTriangle className="text-destructive"/> Absent Students</CardTitle>
-                                        <div className="text-sm text-muted-foreground">Students who did not enter the geofence on {selectedDate.toLocaleDateString()}. Total: <Badge variant="destructive">{absentOnDate.length}</Badge></div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <ScrollArea className="h-64">
-                                            <div className="space-y-4">
-                                                {absentOnDate.length > 0 ? absentOnDate.map(student => (
-                                                    <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
-                                                )) : <p className="text-muted-foreground text-center py-8">No students were absent on this day.</p>}
-                                            </div>
-                                        </ScrollArea>
-                                    </CardContent>
-                                </Card>
-                            </>
-                        )}
-                    </div>
-                    <div className="lg:col-span-1 flex flex-col gap-8">
-                         <Card className="shadow-lg">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 font-headline text-xl">
-                                    <User />
-                                    Your Profile
-                                </CardTitle>
-                                <CardDescription>Your personal information and unique code for students.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div>
-                                    <h3 className="font-semibold">{teacher.name}</h3>
-                                    <div className="text-sm text-muted-foreground space-y-1 mt-1">
-                                        <div className="flex items-center gap-2"><Mail className="h-4 w-4"/> {teacher.email}</div>
-                                        <div className="flex items-center gap-2"><Phone className="h-4 w-4"/> {teacher.phone}</div>
-                                    </div>
+                 <div className="flex flex-col gap-8">
+                     <Card className="shadow-lg">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 font-headline text-xl">
+                                <User />
+                                Your Profile
+                            </CardTitle>
+                            <CardDescription>Your personal information and unique code for students.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div>
+                                <h3 className="font-semibold">{teacher.name}</h3>
+                                <div className="text-sm text-muted-foreground space-y-1 mt-1">
+                                    <div className="flex items-center gap-2"><Mail className="h-4 w-4"/> {teacher.email}</div>
+                                    <div className="flex items-center gap-2"><Phone className="h-4 w-4"/> {teacher.phone}</div>
                                 </div>
-                                <div>
-                                    <Label>Your Teacher Code</Label>
-                                    <div 
-                                        className="flex items-center justify-between rounded-lg border bg-muted p-3 mt-1 cursor-pointer"
-                                        onClick={copyToClipboard}
-                                    >
-                                        <span className="font-mono text-xl tracking-widest">{teacher.teacherCode}</span>
-                                        <Button variant="ghost" size="icon">
-                                            <Copy className="h-5 w-5" />
-                                        </Button>
-                                    </div>
-                                     <p className="text-xs text-muted-foreground mt-2">Click the code to copy it.</p>
+                            </div>
+                            <div>
+                                <Label>Your Teacher Code</Label>
+                                <div 
+                                    className="flex items-center justify-between rounded-lg border bg-muted p-3 mt-1 cursor-pointer"
+                                    onClick={copyToClipboard}
+                                >
+                                    <span className="font-mono text-xl tracking-widest">{teacher.teacherCode}</span>
+                                    <Button variant="ghost" size="icon">
+                                        <Copy className="h-5 w-5" />
+                                    </Button>
                                 </div>
-                            </CardContent>
-                        </Card>
-                        <Card className="shadow-lg">
-                            <CardHeader>
-                                <CardTitle className="flex items-center justify-between gap-2 font-headline text-xl">
-                                    <div className="flex items-center gap-2">
-                                        <CalendarIcon />
-                                        Attendance
-                                    </div>
-                                    {selectedDate && <Button variant="ghost" size="icon" onClick={() => setSelectedDate(undefined)}><X className="h-4 w-4"/></Button>}
-                                </CardTitle>
-                                <CardDescription>Select a day to see attendance or view all entry days highlighted.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex justify-center">
-                                <Calendar
-                                    mode="single"
-                                    selected={selectedDate}
-                                    onSelect={setSelectedDate}
-                                    modifiers={{
-                                        entries: allEntryDates,
-                                    }}
-                                    modifiersClassNames={{
-                                        entries: 'bg-primary/20',
-                                    }}
-                                    className="rounded-md border"
-                                />
-                            </CardContent>
-                        </Card>
+                                 <p className="text-xs text-muted-foreground mt-2">Click the code to copy it.</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2 flex flex-col gap-8">
+                            {!selectedDate ? (
+                                <>
+                                    <Card className="shadow-lg">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2 font-headline text-xl"><CheckCircle className="text-green-600"/> Students Inside Geofence (Live)</CardTitle>
+                                            <div className="text-sm text-muted-foreground">Students currently within the designated college area. Total: <Badge>{studentsInside.length}</Badge></div>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <ScrollArea className="h-64">
+                                                <div className="space-y-4">
+                                                    {studentsInside.length > 0 ? studentsInside.map(student => (
+                                                        <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
+                                                    )) : <p className="text-muted-foreground text-center py-8">No students are currently inside the geofence.</p>}
+                                                </div>
+                                            </ScrollArea>
+                                        </CardContent>
+                                    </Card>
+                                    <Card className="shadow-lg">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2 font-headline text-xl"><AlertTriangle className="text-destructive"/> Students Outside Geofence (Live)</CardTitle>
+                                            <div className="text-sm text-muted-foreground">Students currently outside the designated college area. Total: <Badge variant="destructive">{studentsOutside.length}</Badge></div>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <ScrollArea className="h-64">
+                                                <div className="space-y-4">
+                                                    {studentsOutside.length > 0 ? studentsOutside.map(student => (
+                                                        <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
+                                                    )) : <p className="text-muted-foreground text-center py-8">All students are currently accounted for.</p>}
+                                                </div>
+                                            </ScrollArea>
+                                        </CardContent>
+                                    </Card>
+                                </>
+                            ) : (
+                                 <>
+                                    <Card className="shadow-lg">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2 font-headline text-xl"><CheckCircle className="text-green-600"/> Attended Students</CardTitle>
+                                            <div className="text-sm text-muted-foreground">Students who entered the geofence on {selectedDate.toLocaleDateString()}. Total: <Badge>{attendedOnDate.length}</Badge></div>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <ScrollArea className="h-64">
+                                                <div className="space-y-4">
+                                                    {attendedOnDate.length > 0 ? attendedOnDate.map(student => (
+                                                        <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
+                                                    )) : <p className="text-muted-foreground text-center py-8">No students attended on this day.</p>}
+                                                </div>
+                                            </ScrollArea>
+                                        </CardContent>
+                                    </Card>
+                                     <Card className="shadow-lg">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2 font-headline text-xl"><AlertTriangle className="text-destructive"/> Absent Students</CardTitle>
+                                            <div className="text-sm text-muted-foreground">Students who did not enter the geofence on {selectedDate.toLocaleDateString()}. Total: <Badge variant="destructive">{absentOnDate.length}</Badge></div>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <ScrollArea className="h-64">
+                                                <div className="space-y-4">
+                                                    {absentOnDate.length > 0 ? absentOnDate.map(student => (
+                                                        <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
+                                                    )) : <p className="text-muted-foreground text-center py-8">No students were absent on this day.</p>}
+                                                </div>
+                                            </ScrollArea>
+                                        </CardContent>
+                                    </Card>
+                                </>
+                            )}
+                        </div>
+                        <div className="lg:col-span-1 flex flex-col gap-8">
+                            <Card className="shadow-lg">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center justify-between gap-2 font-headline text-xl">
+                                        <div className="flex items-center gap-2">
+                                            <CalendarIcon />
+                                            Attendance
+                                        </div>
+                                        {selectedDate && <Button variant="ghost" size="icon" onClick={() => setSelectedDate(undefined)}><X className="h-4 w-4"/></Button>}
+                                    </CardTitle>
+                                    <CardDescription>Select a day to see attendance or view all entry days highlighted.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex justify-center">
+                                    <Calendar
+                                        mode="single"
+                                        selected={selectedDate}
+                                        onSelect={setSelectedDate}
+                                        modifiers={{
+                                            entries: allEntryDates,
+                                        }}
+                                        modifiersClassNames={{
+                                            entries: 'bg-primary/20',
+                                        }}
+                                        className="rounded-md border"
+                                    />
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -294,4 +297,5 @@ export default function TeacherDashboardPage() {
             )}
         </div>
     );
-}
+
+    
