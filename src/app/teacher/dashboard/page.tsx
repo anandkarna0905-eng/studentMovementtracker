@@ -28,7 +28,8 @@ export default function TeacherDashboardPage() {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
     useEffect(() => {
-        setYear(new Date().getFullYear());
+        const currentYear = new Date().getFullYear();
+        setYear(currentYear);
     }, []);
 
     const studentsInside = students.filter(s => s.status === 'safe');
@@ -215,9 +216,9 @@ export default function TeacherDashboardPage() {
                                     </div>
                                 </div>
                             </div>
-                            <DialogDescription>
+                             <div className="text-sm text-muted-foreground">
                                 History of when the student entered the geofence. Total entries: <Badge>{selectedStudent.entryLogs.length}</Badge>
-                            </DialogDescription>
+                            </div>
                         </DialogHeader>
                         <ScrollArea className="h-60 mt-4">
                             <div className="space-y-4 pr-4">

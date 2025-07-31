@@ -33,7 +33,8 @@ export default function StudentDashboardPage() {
     const [year, setYear] = useState<number | null>(null);
 
     useEffect(() => {
-        setYear(new Date().getFullYear());
+        const currentYear = new Date().getFullYear();
+        setYear(currentYear);
         // In a real app, you'd fetch the student's data here.
         // For now, we'll add some more dynamic logs to the mock data for demonstration.
         const interval = setInterval(() => {
@@ -89,9 +90,9 @@ export default function StudentDashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <h2 className="text-xl font-headline font-semibold mb-4">Geofence Entry Log</h2>
-                        <CardDescription className="mb-4">
+                        <div className="mb-4 text-sm text-muted-foreground">
                             Here is a record of all the times you have entered the designated campus area. Total entries: <Badge>{student.entryLogs.length}</Badge>
-                        </CardDescription>
+                        </div>
                         <ScrollArea className="h-96 border rounded-md p-4">
                             <div className="space-y-6">
                                 {Object.entries(groupLogsByDay(student.entryLogs)).reverse().map(([day, logs]) => (
