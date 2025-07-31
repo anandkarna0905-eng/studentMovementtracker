@@ -23,7 +23,7 @@ export default function LoginPage() {
     if (role === 'student') {
       router.push('/student/dashboard');
     } else {
-      router.push('/teacher/geofence');
+      router.push('/teacher/dashboard');
     }
   };
 

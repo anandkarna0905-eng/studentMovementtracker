@@ -11,7 +11,7 @@ import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { Circle } from '@/components/circle';
 import { Pin } from '@/components/pin';
 import type { Geofence } from '@/types';
-import { LocateFixed, LogOut } from 'lucide-react';
+import { LocateFixed, LogOut, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 const INITIAL_GEOFENCE: Geofence = {
@@ -54,7 +54,7 @@ export default function GeofencePage() {
             <div className="flex items-center gap-4">
                 <LocateFixed className="h-8 w-8" />
                 <h1 className="text-2xl font-headline font-bold">
-                    Teacher Geofence Control
+                    Geofence Control
                 </h1>
             </div>
             <Link href="/" passHref>
@@ -65,77 +65,83 @@ export default function GeofencePage() {
             </Link>
         </div>
       </header>
-      <main className="flex-grow container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 h-[60vh] lg:h-auto">
-            {apiKey ? (
-                <APIProvider apiKey={apiKey}>
-                    <Map
-                        defaultCenter={geofence.center}
-                        defaultZoom={15}
-                        mapId="geofence-map"
-                        className="w-full h-full rounded-lg shadow-lg"
-                        gestureHandling={'greedy'}
-                        disableDefaultUI={true}
-                        onClick={handleCenterChange}
-                    >
-                        <Circle
-                            center={geofence.center}
-                            radius={geofence.radius}
-                            strokeColor="hsl(var(--accent))"
-                            strokeOpacity={0.8}
-                            strokeWeight={2}
-                            fillColor="hsl(var(--accent))"
-                            fillOpacity={0.25}
-                        />
-                         <AdvancedMarker position={geofence.center} title={'Geofence Center'}>
-                             <Pin
-                                background={'hsl(var(--accent))'}
-                                borderColor={'hsl(var(--accent-foreground))'}
-                                glyphColor={'hsl(var(--accent-foreground))'}
-                             />
-                        </AdvancedMarker>
-                    </Map>
-                </APIProvider>
-            ) : (
-                <div className="flex items-center justify-center h-full bg-muted rounded-lg">
-                    <p className="text-muted-foreground">Google Maps API Key is missing.</p>
-                </div>
-            )}
-        </div>
-        <div className="lg:col-span-1">
-            <Card className="shadow-lg">
-                <CardHeader>
-                    <CardTitle className="font-headline text-xl">Set Geofence Boundary</CardTitle>
-                    <CardDescription>Click on the map to set the center and use the controls below to adjust the boundary.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="lat">Latitude</Label>
-                            <Input id="lat" value={geofence.center.lat.toFixed(6)} readOnly />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="lng">Longitude</Label>
-                            <Input id="lng" value={geofence.center.lng.toFixed(6)} readOnly />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="radius">Radius (meters)</Label>
-                        <div className="flex items-center gap-4">
-                            <Slider
-                                id="radius"
-                                min={50}
-                                max={1000}
-                                step={10}
-                                value={[geofence.radius]}
-                                onValueChange={handleRadiusChange}
+       <main className="flex-grow container mx-auto p-4 md:p-8">
+        <Link href="/teacher/dashboard" className="inline-flex items-center gap-2 mb-4 text-sm font-medium text-primary hover:underline">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+        </Link>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 h-[60vh] lg:h-auto">
+                {apiKey ? (
+                    <APIProvider apiKey={apiKey}>
+                        <Map
+                            defaultCenter={geofence.center}
+                            defaultZoom={15}
+                            mapId="geofence-map"
+                            className="w-full h-full rounded-lg shadow-lg"
+                            gestureHandling={'greedy'}
+                            disableDefaultUI={true}
+                            onClick={handleCenterChange}
+                        >
+                            <Circle
+                                center={geofence.center}
+                                radius={geofence.radius}
+                                strokeColor="hsl(var(--accent))"
+                                strokeOpacity={0.8}
+                                strokeWeight={2}
+                                fillColor="hsl(var(--accent))"
+                                fillOpacity={0.25}
                             />
-                            <span className="font-mono text-lg w-24 text-center p-2 rounded-md bg-muted">{geofence.radius}m</span>
-                        </div>
+                             <AdvancedMarker position={geofence.center} title={'Geofence Center'}>
+                                 <Pin
+                                    background={'hsl(var(--accent))'}
+                                    borderColor={'hsl(var(--accent-foreground))'}
+                                    glyphColor={'hsl(var(--accent-foreground))'}
+                                 />
+                            </AdvancedMarker>
+                        </Map>
+                    </APIProvider>
+                ) : (
+                    <div className="flex items-center justify-center h-full bg-muted rounded-lg">
+                        <p className="text-muted-foreground">Google Maps API Key is missing.</p>
                     </div>
-                     <Button onClick={handleSave} className="w-full font-bold">Save Geofence</Button>
-                </CardContent>
-            </Card>
+                )}
+            </div>
+            <div className="lg:col-span-1">
+                <Card className="shadow-lg">
+                    <CardHeader>
+                        <CardTitle className="font-headline text-xl">Set Geofence Boundary</CardTitle>
+                        <CardDescription>Click on the map to set the center and use the controls below to adjust the boundary.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="lat">Latitude</Label>
+                                <Input id="lat" value={geofence.center.lat.toFixed(6)} readOnly />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="lng">Longitude</Label>
+                                <Input id="lng" value={geofence.center.lng.toFixed(6)} readOnly />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="radius">Radius (meters)</Label>
+                            <div className="flex items-center gap-4">
+                                <Slider
+                                    id="radius"
+                                    min={50}
+                                    max={1000}
+                                    step={10}
+                                    value={[geofence.radius]}
+                                    onValueChange={handleRadiusChange}
+                                />
+                                <span className="font-mono text-lg w-24 text-center p-2 rounded-md bg-muted">{geofence.radius}m</span>
+                            </div>
+                        </div>
+                         <Button onClick={handleSave} className="w-full font-bold">Save Geofence</Button>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
       </main>
        <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
