@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import type { Student, BreachAlert, Geofence } from '@/types';
+import type { Student, BreachAlert, Geofence, EntryLog } from '@/types';
 import { getLocationStatus } from '@/ai/flows/location-status-reasoning';
 import { haversineDistance } from '@/lib/utils';
 import { MapView } from './map-view';
@@ -10,6 +10,15 @@ import { AlertCard } from './alert-card';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { ScrollArea } from './ui/scroll-area';
 import { Users, Bell, Hourglass } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Badge } from './ui/badge';
+import { Calendar, Clock } from 'lucide-react';
 
 const GEOFENCE: Geofence = {
   center: { lat: 34.0522, lng: -118.2437 }, // Downtown LA
@@ -17,19 +26,20 @@ const GEOFENCE: Geofence = {
 };
 
 const INITIAL_STUDENTS: Student[] = [
-  { id: 'STU-001', name: 'Alice Johnson', location: { lat: 34.0522, lng: -118.2437 }, status: 'unknown', lastStatusCheck: 'complete' },
-  { id: 'STU-002', name: 'Bob Williams', location: { lat: 34.0524, lng: -118.2435 }, status: 'unknown', lastStatusCheck: 'complete' },
-  { id: 'STU-003', name: 'Charlie Brown', location: { lat: 34.0519, lng: -118.2440 }, status: 'unknown', lastStatusCheck: 'complete' },
-  { id: 'STU-004', name: 'Diana Miller', location: { lat: 34.0530, lng: -118.2430 }, status: 'unknown', lastStatusCheck: 'complete' },
+  { id: 'STU-001', name: 'Alice Johnson', location: { lat: 34.0522, lng: -118.2437 }, status: 'unknown', lastStatusCheck: 'complete', entryLogs: [] },
+  { id: 'STU-002', name: 'Bob Williams', location: { lat: 34.0524, lng: -118.2435 }, status: 'unknown', lastStatusCheck: 'complete', entryLogs: [] },
+  { id: 'STU-003', name: 'Charlie Brown', location: { lat: 34.0519, lng: -118.2440 }, status: 'unknown', lastStatusCheck: 'complete', entryLogs: [] },
+  { id: 'STU-004', name: 'Diana Miller', location: { lat: 34.0530, lng: -118.2430 }, status: 'unknown', lastStatusCheck: 'complete', entryLogs: [] },
 ];
 
-const COLLEGE_HOURS = { start: 9, end: 16 }; // 9:00 AM to 4:00 PM
+const COLLEGE_HOURS = { start: 9, end: 17 }; // 9:00 AM to 5:00 PM
 
 export function Dashboard() {
   const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
   const [alerts, setAlerts] = useState<BreachAlert[]>([]);
   const [isCollegeHours, setIsCollegeHours] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
 
   const checkCollegeHours = useCallback(() => {
     const now = new Date();
@@ -91,15 +101,26 @@ export function Dashboard() {
           };
 
           const distance = haversineDistance(GEOFENCE.center, newLocation);
+          const wasInside = student.status === 'safe';
+          const isInside = distance <= GEOFENCE.radius;
+
           const wasBreached = student.status === 'breached';
           const isBreaching = distance > GEOFENCE.radius;
-
-          if (isBreaching && !wasBreached) {
-            handleBreach({ ...student, location: newLocation });
-            return { ...student, location: newLocation, status: 'breached', lastStatusCheck: 'pending' };
+          
+          let newEntryLogs = student.entryLogs;
+          if (isInside && !wasInside) {
+              const newLog: EntryLog = { time: new Date().toLocaleString() };
+              newEntryLogs = [...student.entryLogs, newLog];
+              // Notify faculty here if needed
+              console.log(`Student ${student.name} entered the geofence.`);
           }
 
-          return { ...student, location: newLocation, status: isBreaching ? 'breached' : 'safe', lastStatusCheck: 'complete' };
+          if (isBreaching && !wasBreached) {
+            handleBreach({ ...student, location: newLocation, entryLogs: newEntryLogs });
+            return { ...student, location: newLocation, status: 'breached', lastStatusCheck: 'pending', entryLogs: newEntryLogs };
+          }
+
+          return { ...student, location: newLocation, status: isBreaching ? 'breached' : 'safe', lastStatusCheck: 'complete', entryLogs: newEntryLogs };
         })
       );
     }, 5000); // Update every 5 seconds
@@ -109,7 +130,23 @@ export function Dashboard() {
   
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
+  const handleStudentCardClick = (student: Student) => {
+    setSelectedStudent(student);
+  };
+
+  const groupLogsByDay = (logs: EntryLog[]) => {
+    return logs.reduce((acc, log) => {
+      const date = new Date(log.time).toLocaleDateString();
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(log);
+      return acc;
+    }, {} as Record<string, EntryLog[]>);
+  }
+
   return (
+    <>
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
         <Card className="shadow-lg h-[400px] lg:h-[650px]">
@@ -138,7 +175,7 @@ export function Dashboard() {
             <ScrollArea className="h-64">
               <div className="space-y-4">
                 {students.map(student => (
-                  <StudentCard key={student.id} student={student} />
+                  <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
                 ))}
               </div>
             </ScrollArea>
@@ -168,5 +205,38 @@ export function Dashboard() {
         </Card>
       </div>
     </div>
+    {selectedStudent && (
+        <Dialog open={!!selectedStudent} onOpenChange={(open) => !open && setSelectedStudent(null)}>
+            <DialogContent className="max-w-lg">
+                <DialogHeader>
+                    <DialogTitle className="font-headline text-2xl">{selectedStudent.name}'s Entry Log</DialogTitle>
+                    <DialogDescription>
+                        History of when the student entered the geofence. Total entries: <Badge>{selectedStudent.entryLogs.length}</Badge>
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-72 mt-4">
+                    <div className="space-y-4 pr-4">
+                        {Object.entries(groupLogsByDay(selectedStudent.entryLogs)).map(([day, logs]) => (
+                            <div key={day}>
+                                <h3 className="font-semibold text-lg mb-2 flex items-center gap-2"><Calendar className="h-5 w-5"/> {day} <Badge variant="secondary">{logs.length} entries</Badge></h3>
+                                <ul className="space-y-1 list-disc pl-5">
+                                    {logs.map((log, index) => (
+                                       <li key={index} className="flex items-center gap-2 text-sm">
+                                           <Clock className="h-4 w-4 text-muted-foreground" />
+                                           <span>{new Date(log.time).toLocaleTimeString()}</span>
+                                       </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                         {selectedStudent.entryLogs.length === 0 && (
+                            <p className="text-muted-foreground text-center py-8">No entry logs recorded yet.</p>
+                        )}
+                    </div>
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
+    )}
+    </>
   );
 }

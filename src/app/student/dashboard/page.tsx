@@ -6,7 +6,7 @@ import { Dashboard } from '@/components/dashboard';
 import { LocateFixed } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 
 export default function StudentDashboardPage() {
   const [year, setYear] = useState<number | null>(null);
@@ -25,12 +25,20 @@ export default function StudentDashboardPage() {
                     Student Dashboard
                 </h1>
             </div>
-            <Link href="/" passHref>
-                <Button variant="secondary" className="font-bold">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+                <Link href="/student/profile" passHref>
+                    <Button variant="secondary" className="font-bold">
+                        <User className="mr-2 h-4 w-4" />
+                        My Profile
+                    </Button>
+                </Link>
+                <Link href="/" passHref>
+                    <Button variant="secondary" className="font-bold">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                    </Button>
+                </Link>
+            </div>
         </div>
       </header>
       <main className="flex-grow container mx-auto p-4 md:p-8">
