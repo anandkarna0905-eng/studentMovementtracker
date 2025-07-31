@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { LocateFixed, User, LogOut, Calendar, Clock, LogIn, LogOut as LogOutIcon } from 'lucide-react';
+import { LocateFixed, User, LogOut, Calendar, Clock, LogIn, LogOut as LogOutIcon, Mail, Phone, School } from 'lucide-react';
 import Link from 'next/link';
 
 // Mock student data. In a real app, this would be fetched based on the logged-in user.
@@ -19,6 +19,10 @@ const MOCK_STUDENT: Student = {
     location: { lat: 34.0522, lng: -118.2437 },
     status: 'safe',
     lastStatusCheck: 'complete',
+    teacher: {
+        name: 'Mr. Smith',
+        phone: '+19876543210'
+    },
     entryLogs: [
         { entryTime: '10/26/2023, 9:05:15 AM', exitTime: '10/26/2023, 1:30:45 PM' },
         { entryTime: '10/27/2023, 9:01:22 AM', exitTime: '10/27/2023, 5:01:22 PM' },
@@ -68,60 +72,82 @@ export default function StudentDashboardPage() {
                     </Link>
                 </div>
             </header>
-            <main className="flex-grow container mx-auto p-4 md:p-8 flex items-center justify-center">
-                <Card className="w-full max-w-4xl mx-auto shadow-lg">
-                    <CardHeader className="flex flex-row items-start gap-4">
-                        <div className="p-4 bg-muted rounded-full">
-                            <User className="h-10 w-10 text-muted-foreground" />
-                        </div>
-                        <div>
-                            <CardTitle className="text-3xl font-headline">{student.name}</CardTitle>
-                            <CardDescription className="text-lg">Student ID: {student.id}</CardDescription>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <h2 className="text-xl font-headline font-semibold mb-4">Geofence Entry & Exit Log</h2>
-                        <div className="mb-4 text-sm text-muted-foreground">
-                            Here is a record of all the times you have entered and exited the designated campus area. Total entries: <Badge>{student.entryLogs.length}</Badge>
-                        </div>
-                        <ScrollArea className="h-96 border rounded-md p-4">
-                            <div className="space-y-6">
-                                {Object.entries(groupLogsByDay(student.entryLogs)).reverse().map(([day, logs]) => (
-                                    <div key={day}>
-                                        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 sticky top-0 bg-background py-2">
-                                            <Calendar className="h-5 w-5"/> {day} <Badge variant="secondary">{logs.length} sessions</Badge>
-                                        </h3>
-                                        <ul className="space-y-2">
-                                            {logs.map((log, index) => (
-                                               <li key={index} className="p-3 rounded-md bg-muted/50 space-y-2">
-                                                   <div className="flex items-center gap-3">
-                                                       <LogIn className="h-5 w-5 text-green-600" />
-                                                       <div>
-                                                           <span className="font-semibold">Entry:</span>
-                                                           <span className="font-mono text-sm ml-2">{new Date(log.entryTime).toLocaleTimeString()}</span>
-                                                       </div>
-                                                   </div>
-                                                   {log.exitTime && (
-                                                       <div className="flex items-center gap-3">
-                                                           <LogOutIcon className="h-5 w-5 text-red-600" />
-                                                           <div>
-                                                               <span className="font-semibold">Exit:</span>
-                                                               <span className="font-mono text-sm ml-2">{new Date(log.exitTime).toLocaleTimeString()}</span>
-                                                           </div>
-                                                       </div>
-                                                   )}
-                                               </li>
-                                            ))}
-                                        </ul>
+            <main className="flex-grow container mx-auto p-4 md:p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-1">
+                        <Card className="shadow-lg">
+                             <CardHeader className="text-center">
+                                <div className="mx-auto bg-muted rounded-full h-24 w-24 flex items-center justify-center mb-4 border">
+                                    <User className="h-12 w-12 text-muted-foreground" />
+                                </div>
+                                <CardTitle className="text-2xl font-headline">{student.name}</CardTitle>
+                                <CardDescription>Student ID: {student.id}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="space-y-2 text-sm">
+                                    <h3 className="font-semibold text-base font-headline">Your Information</h3>
+                                    <div className="flex items-center gap-2 text-muted-foreground"><Mail className="h-4 w-4"/> {student.email}</div>
+                                    <div className="flex items-center gap-2 text-muted-foreground"><Phone className="h-4 w-4"/> {student.phone}</div>
+                                </div>
+                                {student.teacher && (
+                                     <div className="space-y-2 text-sm pt-4 border-t">
+                                        <h3 className="font-semibold text-base font-headline">Assigned Teacher</h3>
+                                        <div className="flex items-center gap-2 text-muted-foreground"><School className="h-4 w-4"/> {student.teacher.name}</div>
+                                        <div className="flex items-center gap-2 text-muted-foreground"><Phone className="h-4 w-4"/> {student.teacher.phone}</div>
                                     </div>
-                                ))}
-                                {student.entryLogs.length === 0 && (
-                                    <p className="text-muted-foreground text-center py-16">No entry logs recorded yet.</p>
                                 )}
-                            </div>
-                        </ScrollArea>
-                    </CardContent>
-                </Card>
+                            </CardContent>
+                        </Card>
+                    </div>
+                     <div className="lg:col-span-2">
+                        <Card className="w-full mx-auto shadow-lg">
+                            <CardHeader>
+                                <CardTitle className="text-xl font-headline font-semibold">Geofence Entry & Exit Log</CardTitle>
+                                <CardDescription className="text-sm text-muted-foreground">
+                                    Here is a record of all the times you have entered and exited the designated campus area. Total entries: <Badge>{student.entryLogs.length}</Badge>
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <ScrollArea className="h-96 border rounded-md p-4">
+                                    <div className="space-y-6">
+                                        {Object.entries(groupLogsByDay(student.entryLogs)).reverse().map(([day, logs]) => (
+                                            <div key={day}>
+                                                <h3 className="font-semibold text-lg mb-2 flex items-center gap-2 sticky top-0 bg-background py-2">
+                                                    <Calendar className="h-5 w-5"/> {day} <Badge variant="secondary">{logs.length} sessions</Badge>
+                                                </h3>
+                                                <ul className="space-y-2">
+                                                    {logs.map((log, index) => (
+                                                    <li key={index} className="p-3 rounded-md bg-muted/50 space-y-2">
+                                                        <div className="flex items-center gap-3">
+                                                            <LogIn className="h-5 w-5 text-green-600" />
+                                                            <div>
+                                                                <span className="font-semibold">Entry:</span>
+                                                                <span className="font-mono text-sm ml-2">{new Date(log.entryTime).toLocaleTimeString()}</span>
+                                                            </div>
+                                                        </div>
+                                                        {log.exitTime && (
+                                                            <div className="flex items-center gap-3">
+                                                                <LogOutIcon className="h-5 w-5 text-red-600" />
+                                                                <div>
+                                                                    <span className="font-semibold">Exit:</span>
+                                                                    <span className="font-mono text-sm ml-2">{new Date(log.exitTime).toLocaleTimeString()}</span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                        {student.entryLogs.length === 0 && (
+                                            <p className="text-muted-foreground text-center py-16">No entry logs recorded yet.</p>
+                                        )}
+                                    </div>
+                                </ScrollArea>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
             </main>
             <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
                 <div className="container mx-auto">
@@ -131,3 +157,4 @@ export default function StudentDashboardPage() {
         </div>
     );
 }
+

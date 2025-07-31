@@ -19,6 +19,10 @@ export type Student = {
   lastStatusCheck: 'pending' | 'complete';
   entryLogs: EntryLog[];
   teacherCode?: string;
+  teacher?: {
+    name: string;
+    phone: string;
+  };
   breachDetails?: {
     time: string;
     location: Location;
