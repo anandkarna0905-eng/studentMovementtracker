@@ -39,6 +39,20 @@ export default function GeofencePage() {
     }
   };
 
+  const handleLatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const lat = parseFloat(e.target.value);
+    if (!isNaN(lat)) {
+      setGeofence(g => ({ ...g, center: { ...g.center, lat } }));
+    }
+  };
+
+  const handleLngChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const lng = parseFloat(e.target.value);
+    if (!isNaN(lng)) {
+      setGeofence(g => ({ ...g, center: { ...g.center, lng } }));
+    }
+  };
+
   const handleSave = () => {
     // Here you would save the geofence to your backend
     console.log('Saving geofence:', geofence);
@@ -75,8 +89,8 @@ export default function GeofencePage() {
                 {apiKey ? (
                     <APIProvider apiKey={apiKey}>
                         <Map
-                            defaultCenter={geofence.center}
-                            defaultZoom={15}
+                            center={geofence.center}
+                            zoom={15}
                             mapId="geofence-map"
                             className="w-full h-full rounded-lg shadow-lg"
                             gestureHandling={'greedy'}
@@ -117,11 +131,11 @@ export default function GeofencePage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="lat">Latitude</Label>
-                                <Input id="lat" value={geofence.center.lat.toFixed(6)} readOnly />
+                                <Input id="lat" type="number" value={geofence.center.lat} onChange={handleLatChange} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="lng">Longitude</Label>
-                                <Input id="lng" value={geofence.center.lng.toFixed(6)} readOnly />
+                                <Input id="lng" type="number" value={geofence.center.lng} onChange={handleLngChange} />
                             </div>
                         </div>
                         <div className="space-y-2">
