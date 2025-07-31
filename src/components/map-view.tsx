@@ -1,6 +1,8 @@
 'use client';
 
-import { APIProvider, Map, Circle, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
+import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import { Circle } from './circle';
+import { Pin } from './pin';
 import type { Student, Geofence } from '@/types';
 import { AlertTriangle } from 'lucide-react';
 
@@ -46,7 +48,7 @@ export function MapView({ apiKey, students, geofence }: MapViewProps) {
         />
         {students.map(student => (
           <AdvancedMarker key={student.id} position={student.location} title={student.name}>
-             <Pin 
+             <Pin
                 background={student.status === 'breached' ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'}
                 borderColor={student.status === 'breached' ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'}
                 glyphColor={'hsl(var(--primary-foreground))'}

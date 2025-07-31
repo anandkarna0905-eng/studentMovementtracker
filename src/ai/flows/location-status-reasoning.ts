@@ -33,6 +33,7 @@ const prompt = ai.definePrompt({
   name: 'locationStatusPrompt',
   input: {schema: LocationStatusInputSchema},
   output: {schema: LocationStatusOutputSchema},
+  model: 'googleai/gemini-1.5-flash',
   prompt: `You are an AI assistant that determines the location status of a student and generates a notification message.
 
   Based on the following information, determine if the student is in breach or not in breach. Then generate a notification message summarizing the situation.
