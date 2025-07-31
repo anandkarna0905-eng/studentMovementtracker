@@ -49,20 +49,6 @@ export default function GeofencePage() {
       setCurrentGeofence(g => ({ ...g, center: e.latLng!.toJSON() }));
     }
   };
-
-  const handleLatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const lat = parseFloat(e.target.value);
-    if (!isNaN(lat)) {
-      setCurrentGeofence(g => ({ ...g, center: { ...g.center, lat } }));
-    }
-  };
-
-  const handleLngChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const lng = parseFloat(e.target.value);
-    if (!isNaN(lng)) {
-      setCurrentGeofence(g => ({ ...g, center: { ...g.center, lng } }));
-    }
-  };
   
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentGeofence(g => ({ ...g, name: e.target.value }));
@@ -204,22 +190,12 @@ export default function GeofencePage() {
                 <Card className="shadow-lg">
                     <CardHeader>
                         <CardTitle className="font-headline text-xl">{currentGeofence.id === 'new' ? 'Add New Geofence' : `Editing: ${currentGeofence.name}`}</CardTitle>
-                        <CardDescription>Click on the map to set the center and use the controls below to adjust the boundary.</CardDescription>
+                        <CardDescription>Click on the map to set the center point. Then, provide a name and adjust the radius below.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                          <div className="space-y-2">
                             <Label htmlFor="name">Location Name</Label>
                             <Input id="name" type="text" value={currentGeofence.name} onChange={handleNameChange} placeholder="e.g., Main Campus" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="lat">Latitude</Label>
-                                <Input id="lat" type="number" value={currentGeofence.center.lat} onChange={handleLatChange} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="lng">Longitude</Label>
-                                <Input id="lng" type="number" value={currentGeofence.center.lng} onChange={handleLngChange} />
-                            </div>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="radius">Radius (meters)</Label>
@@ -249,5 +225,3 @@ export default function GeofencePage() {
     </div>
   );
 }
-
-    
