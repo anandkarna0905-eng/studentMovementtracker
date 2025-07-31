@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { LocateFixed, User, School } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [role, setRole] = useState<'student' | 'teacher'>('student');
@@ -65,6 +66,12 @@ export default function LoginPage() {
                             </Label>
                         </div>
                     </RadioGroup>
+                    <div className="mt-4 text-center text-sm">
+                        Don&apos;t have an account?{' '}
+                        <Link href="/register" className="underline">
+                            Sign up
+                        </Link>
+                    </div>
                 </CardContent>
                 <CardFooter>
                     <Button onClick={handleLogin} className="w-full font-bold">Login</Button>
@@ -73,7 +80,7 @@ export default function LoginPage() {
         </main>
         <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
             <div className="container mx-auto">
-                <p>&copy; {year || '...'} StudentMovementTracker. All rights reserved.</p>
+                 <p>&copy; {year || new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
             </div>
       </footer>
     </div>
