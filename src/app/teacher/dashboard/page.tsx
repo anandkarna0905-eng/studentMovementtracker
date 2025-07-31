@@ -12,6 +12,7 @@ import { StudentCard } from '@/components/student-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Clock, Users, CheckCircle, AlertTriangle, Settings, X, Mail, Phone, Copy } from 'lucide-react';
 import Link from 'next/link';
+import { Label } from '@/components/ui/label';
 
 // Mock data, in a real app this would come from a backend.
 const MOCK_TEACHER: Teacher = {
@@ -113,7 +114,7 @@ export default function TeacherDashboardPage() {
                                 <Card className="shadow-lg">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2 font-headline text-xl"><CheckCircle className="text-green-600"/> Students Inside Geofence (Live)</CardTitle>
-                                        <CardDescription>Students currently within the designated college area. Total: <Badge>{studentsInside.length}</Badge></CardDescription>
+                                        <div className="text-sm text-muted-foreground">Students currently within the designated college area. Total: <Badge>{studentsInside.length}</Badge></div>
                                     </CardHeader>
                                     <CardContent>
                                         <ScrollArea className="h-64">
@@ -128,7 +129,7 @@ export default function TeacherDashboardPage() {
                                 <Card className="shadow-lg">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2 font-headline text-xl"><AlertTriangle className="text-destructive"/> Students Outside Geofence (Live)</CardTitle>
-                                        <CardDescription>Students currently outside the designated college area. Total: <Badge variant="destructive">{studentsOutside.length}</Badge></CardDescription>
+                                        <div className="text-sm text-muted-foreground">Students currently outside the designated college area. Total: <Badge variant="destructive">{studentsOutside.length}</Badge></div>
                                     </CardHeader>
                                     <CardContent>
                                         <ScrollArea className="h-64">
@@ -146,7 +147,7 @@ export default function TeacherDashboardPage() {
                                 <Card className="shadow-lg">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2 font-headline text-xl"><CheckCircle className="text-green-600"/> Attended Students</CardTitle>
-                                        <CardDescription>Students who entered the geofence on {selectedDate.toLocaleDateString()}. Total: <Badge>{attendedOnDate.length}</Badge></CardDescription>
+                                        <div className="text-sm text-muted-foreground">Students who entered the geofence on {selectedDate.toLocaleDateString()}. Total: <Badge>{attendedOnDate.length}</Badge></div>
                                     </CardHeader>
                                     <CardContent>
                                         <ScrollArea className="h-64">
@@ -161,7 +162,7 @@ export default function TeacherDashboardPage() {
                                  <Card className="shadow-lg">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2 font-headline text-xl"><AlertTriangle className="text-destructive"/> Absent Students</CardTitle>
-                                        <CardDescription>Students who did not enter the geofence on {selectedDate.toLocaleDateString()}. Total: <Badge variant="destructive">{absentOnDate.length}</Badge></CardDescription>
+                                        <div className="text-sm text-muted-foreground">Students who did not enter the geofence on {selectedDate.toLocaleDateString()}. Total: <Badge variant="destructive">{absentOnDate.length}</Badge></div>
                                     </CardHeader>
                                     <CardContent>
                                         <ScrollArea className="h-64">
