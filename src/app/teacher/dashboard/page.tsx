@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Student, EntryLog, Geofence } from '@/types';
+import type { Student, EntryLog, Teacher } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,10 +10,19 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { StudentCard } from '@/components/student-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Clock, Users, CheckCircle, AlertTriangle, Settings, X, Mail, Phone } from 'lucide-react';
+import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Clock, Users, CheckCircle, AlertTriangle, Settings, X, Mail, Phone, Copy } from 'lucide-react';
 import Link from 'next/link';
 
 // Mock data, in a real app this would come from a backend.
+const MOCK_TEACHER: Teacher = {
+    id: 'TCH-001',
+    name: 'Mr. Smith',
+    email: 'mr.smith@example.com',
+    phone: '+19876543210',
+    teacherCode: '123456',
+    students: [],
+};
+
 const MOCK_STUDENTS: Student[] = [
     { id: 'STU-001', name: 'Alice Johnson', email: 'alice@example.com', phone: '+11111111111', location: { lat: 34.0522, lng: -118.2437 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:05:15' }, { time: '2023-10-27T09:01:22' }] },
     { id: 'STU-002', name: 'Bob Williams', email: 'bob@example.com', phone: '+12222222222', location: { lat: 34.0524, lng: -118.2435 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:03:00' }] },
@@ -22,6 +31,7 @@ const MOCK_STUDENTS: Student[] = [
 ];
 
 export default function TeacherDashboardPage() {
+    const [teacher, setTeacher] = useState<Teacher>(MOCK_TEACHER);
     const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);
     const [year, setYear] = useState<number | null>(null);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -62,6 +72,13 @@ export default function TeacherDashboardPage() {
           acc[date].push(log);
           return acc;
         }, {} as Record<string, EntryLog[]>);
+    }
+    
+    const copyToClipboard = () => {
+        if (teacher.teacherCode) {
+          navigator.clipboard.writeText(teacher.teacherCode);
+          alert('Copied to clipboard!');
+        }
     }
 
     return (
@@ -159,7 +176,38 @@ export default function TeacherDashboardPage() {
                             </>
                         )}
                     </div>
-                    <div className="lg:col-span-1">
+                    <div className="lg:col-span-1 flex flex-col gap-8">
+                         <Card className="shadow-lg">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 font-headline text-xl">
+                                    <User />
+                                    Your Profile
+                                </CardTitle>
+                                <CardDescription>Your personal information and unique code for students.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <h3 className="font-semibold">{teacher.name}</h3>
+                                    <div className="text-sm text-muted-foreground space-y-1 mt-1">
+                                        <div className="flex items-center gap-2"><Mail className="h-4 w-4"/> {teacher.email}</div>
+                                        <div className="flex items-center gap-2"><Phone className="h-4 w-4"/> {teacher.phone}</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label>Your Teacher Code</Label>
+                                    <div 
+                                        className="flex items-center justify-between rounded-lg border bg-muted p-3 mt-1 cursor-pointer"
+                                        onClick={copyToClipboard}
+                                    >
+                                        <span className="font-mono text-xl tracking-widest">{teacher.teacherCode}</span>
+                                        <Button variant="ghost" size="icon">
+                                            <Copy className="h-5 w-5" />
+                                        </Button>
+                                    </div>
+                                     <p className="text-xs text-muted-foreground mt-2">Click the code to copy it.</p>
+                                </div>
+                            </CardContent>
+                        </Card>
                         <Card className="shadow-lg">
                             <CardHeader>
                                 <CardTitle className="flex items-center justify-between gap-2 font-headline text-xl">

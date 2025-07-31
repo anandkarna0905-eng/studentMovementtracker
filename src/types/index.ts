@@ -27,6 +27,8 @@ export type Student = {
 export type Teacher = {
     id: string;
     name: string;
+    email: string;
+    phone: string;
     teacherCode: string;
     students: Student[];
 }
