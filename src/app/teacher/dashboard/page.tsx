@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { StudentCard } from '@/components/student-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Clock, Users, CheckCircle, AlertTriangle, Settings, X, Mail, Phone, Copy } from 'lucide-react';
+import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Clock, Users, CheckCircle, AlertTriangle, Settings, X, Mail, Phone, Copy, LogIn, LogOut as LogOutIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Label } from '@/components/ui/label';
 
@@ -25,10 +25,10 @@ const MOCK_TEACHER: Teacher = {
 };
 
 const MOCK_STUDENTS: Student[] = [
-    { id: 'STU-001', name: 'Alice Johnson', email: 'alice@example.com', phone: '+11111111111', location: { lat: 34.0522, lng: -118.2437 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:05:15' }, { time: '2023-10-27T09:01:22' }] },
-    { id: 'STU-002', name: 'Bob Williams', email: 'bob@example.com', phone: '+12222222222', location: { lat: 34.0524, lng: -118.2435 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:03:00' }] },
+    { id: 'STU-001', name: 'Alice Johnson', email: 'alice@example.com', phone: '+11111111111', location: { lat: 34.0522, lng: -118.2437 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ entryTime: '2023-10-26T09:05:15', exitTime: '2023-10-26T13:00:00' }, { entryTime: '2023-10-27T09:01:22' }] },
+    { id: 'STU-002', name: 'Bob Williams', email: 'bob@example.com', phone: '+12222222222', location: { lat: 34.0524, lng: -118.2435 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ entryTime: '2023-10-26T09:03:00' }] },
     { id: 'STU-003', name: 'Charlie Brown', email: 'charlie@example.com', phone: '+13333333333', location: { lat: 34.0599, lng: -118.2449 }, status: 'breached', lastStatusCheck: 'complete', entryLogs: [] },
-    { id: 'STU-004', name: 'Diana Miller', email: 'diana@example.com', phone: '+14444444444', location: { lat: 34.0530, lng: -118.2430 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ time: '2023-10-26T09:05:15' }, { time: '2023-10-27T09:01:22' }, { time: '2023-10-28T08:59:58' }] },
+    { id: 'STU-004', name: 'Diana Miller', email: 'diana@example.com', phone: '+14444444444', location: { lat: 34.0530, lng: -118.2430 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ entryTime: '2023-10-26T09:05:15' }, { entryTime: '2023-10-27T09:01:22' }, { entryTime: '2023-10-28T08:59:58' }] },
 ];
 
 export default function TeacherDashboardPage() {
@@ -46,14 +46,14 @@ export default function TeacherDashboardPage() {
     const studentsInside = students.filter(s => s.status === 'safe');
     const studentsOutside = students.filter(s => s.status === 'breached');
     
-    const allEntryDates = students.flatMap(s => s.entryLogs.map(log => new Date(log.time)));
+    const allEntryDates = students.flatMap(s => s.entryLogs.map(log => new Date(log.entryTime)));
 
     const getStudentsForDate = (date: Date) => {
         const attended = students.filter(student => 
-            student.entryLogs.some(log => new Date(log.time).toDateString() === date.toDateString())
+            student.entryLogs.some(log => new Date(log.entryTime).toDateString() === date.toDateString())
         );
         const absent = students.filter(student => 
-            !student.entryLogs.some(log => new Date(log.time).toDateString() === date.toDateString())
+            !student.entryLogs.some(log => new Date(log.entryTime).toDateString() === date.toDateString())
         );
         return { attended, absent };
     };
@@ -66,7 +66,7 @@ export default function TeacherDashboardPage() {
 
     const groupLogsByDay = (logs: EntryLog[]) => {
         return logs.reduce((acc, log) => {
-          const date = new Date(log.time).toLocaleDateString();
+          const date = new Date(log.entryTime).toLocaleDateString();
           if (!acc[date]) {
             acc[date] = [];
           }
@@ -269,20 +269,30 @@ export default function TeacherDashboardPage() {
                                 </div>
                             </div>
                              <div className="text-sm text-muted-foreground">
-                                History of when the student entered the geofence. Total entries: <Badge>{selectedStudent.entryLogs.length}</Badge>
+                                History of when the student entered and exited the geofence. Total sessions: <Badge>{selectedStudent.entryLogs.length}</Badge>
                             </div>
                         </DialogHeader>
                         <ScrollArea className="h-60 mt-4">
                             <div className="space-y-4 pr-4">
                                 {Object.entries(groupLogsByDay(selectedStudent.entryLogs)).reverse().map(([day, logs]) => (
                                     <div key={day}>
-                                        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2"><CalendarIcon className="h-5 w-5"/> {day} <Badge variant="secondary">{logs.length} entries</Badge></h3>
-                                        <ul className="space-y-1 list-disc pl-5">
+                                        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2"><CalendarIcon className="h-5 w-5"/> {day} <Badge variant="secondary">{logs.length} sessions</Badge></h3>
+                                        <ul className="space-y-2">
                                             {logs.map((log, index) => (
-                                               <li key={index} className="flex items-center gap-2 text-sm">
-                                                   <Clock className="h-4 w-4 text-muted-foreground" />
-                                                   <span>{new Date(log.time).toLocaleTimeString()}</span>
-                                               </li>
+                                                <li key={index} className="p-2 rounded-md bg-muted/50 space-y-1 text-sm">
+                                                    <div className="flex items-center gap-2">
+                                                        <LogIn className="h-4 w-4 text-green-600" />
+                                                        <span className="font-semibold">In:</span>
+                                                        <span>{new Date(log.entryTime).toLocaleTimeString()}</span>
+                                                    </div>
+                                                    {log.exitTime && (
+                                                        <div className="flex items-center gap-2">
+                                                            <LogOutIcon className="h-4 w-4 text-red-600" />
+                                                            <span className="font-semibold">Out:</span>
+                                                            <span>{new Date(log.exitTime).toLocaleTimeString()}</span>
+                                                        </div>
+                                                    )}
+                                                </li>
                                             ))}
                                         </ul>
                                     </div>
@@ -297,5 +307,4 @@ export default function TeacherDashboardPage() {
             )}
         </div>
     );
-
-    
+}

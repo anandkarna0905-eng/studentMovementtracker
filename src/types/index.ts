@@ -5,7 +5,8 @@ export type Location = {
 };
 
 export type EntryLog = {
-    time: string;
+    entryTime: string;
+    exitTime?: string;
 };
 
 export type Student = {
