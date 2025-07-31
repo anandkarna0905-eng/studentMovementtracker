@@ -21,11 +21,11 @@ const INITIAL_GEOFENCE: Geofence = {
 
 export default function GeofencePage() {
   const [geofence, setGeofence] = useState<Geofence>(INITIAL_GEOFENCE);
-  const [isMounted, setIsMounted] = useState(false);
+  const [year, setYear] = useState<number | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   useEffect(() => {
-    setIsMounted(true);
+    setYear(new Date().getFullYear());
     // You might fetch the current geofence from your backend here
   }, []);
 
@@ -45,7 +45,7 @@ export default function GeofencePage() {
     alert('Geofence saved!');
   };
   
-  if (!isMounted) return null;
+  if (year === null) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -140,7 +140,7 @@ export default function GeofencePage() {
       </main>
        <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
         <div className="container mx-auto">
-            <p>&copy; {new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
+            <p>&copy; {year} StudentMovementTracker. All rights reserved.</p>
         </div>
       </footer>
     </div>

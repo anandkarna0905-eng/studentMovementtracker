@@ -1,4 +1,7 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Dashboard } from '@/components/dashboard';
 import { LocateFixed } from 'lucide-react';
 import Link from 'next/link';
@@ -6,6 +9,12 @@ import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 
 export default function StudentDashboardPage() {
+  const [year, setYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground p-4 shadow-md sticky top-0 z-50">
@@ -29,7 +38,7 @@ export default function StudentDashboardPage() {
       </main>
       <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
         <div className="container mx-auto">
-            <p>&copy; {new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
+            <p>&copy; {year || '...'} StudentMovementTracker. All rights reserved.</p>
         </div>
       </footer>
     </div>
