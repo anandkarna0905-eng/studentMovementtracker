@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -53,46 +54,64 @@ export function Dashboard() {
     const timer = setInterval(checkCollegeHours, 1000); // Check every second
     return () => clearInterval(timer);
   }, [checkCollegeHours]);
+  
+  // Effect for handling breach logic when a student's status changes to 'breached'
+  useEffect(() => {
+    const handleBreach = async (student: Student) => {
+      const timeOfBreach = new Date().toLocaleString();
+      
+      // We already set status to 'breached', but let's also set check to pending
+      setStudents(prev => prev.map(s => s.id === student.id ? { ...s, lastStatusCheck: 'pending' } : s));
 
-  const handleBreach = useCallback(async (student: Student) => {
-    const timeOfBreach = new Date().toLocaleString();
+      try {
+        const result = await getLocationStatus({
+          isBreaching: true,
+          studentName: student.name,
+          studentId: student.id,
+          locationCoordinates: `${student.location.lat.toFixed(4)}, ${student.location.lng.toFixed(4)}`,
+          timeOfBreach,
+        });
+
+        const newAlert: BreachAlert = {
+          id: `${student.id}-${Date.now()}`,
+          studentName: student.name,
+          message: result.notificationMessage,
+          time: timeOfBreach,
+        };
+
+        setAlerts(prev => [newAlert, ...prev]);
+        setStudents(prev => prev.map(s => s.id === student.id ? { ...s, lastStatusCheck: 'complete' } : s));
+      } catch (error) {
+        console.error("Error with GenAI flow:", error);
+        // Reset status if AI flow fails
+        setStudents(prev => prev.map(s => s.id === student.id ? { ...s, status: 'unknown', lastStatusCheck: 'complete' } : s));
+      }
+    };
     
-    setStudents(prev => prev.map(s => s.id === student.id ? { ...s, lastStatusCheck: 'pending' } : s));
+    students.forEach(student => {
+        if (student.status === 'breached' && student.lastStatusCheck !== 'pending') {
+            const studentJustBreached = !alerts.some(alert => alert.studentName === student.name && student.breachDetails?.time === alert.time)
+            if (studentJustBreached) {
+                handleBreach(student);
+            }
+        }
+    });
+  }, [students, alerts]);
 
-    try {
-      const result = await getLocationStatus({
-        isBreaching: true,
-        studentName: student.name,
-        studentId: student.id,
-        locationCoordinates: `${student.location.lat.toFixed(4)}, ${student.location.lng.toFixed(4)}`,
-        timeOfBreach,
-      });
 
-      const newAlert: BreachAlert = {
-        id: `${student.id}-${Date.now()}`,
-        studentName: student.name,
-        message: result.notificationMessage,
-        time: timeOfBreach,
-      };
-
-      setAlerts(prev => [newAlert, ...prev]);
-      setStudents(prev => prev.map(s => s.id === student.id ? { ...s, status: 'breached', lastStatusCheck: 'complete' } : s));
-    } catch (error) {
-      console.error("Error with GenAI flow:", error);
-      setStudents(prev => prev.map(s => s.id === student.id ? { ...s, status: 'unknown', lastStatusCheck: 'complete' } : s));
-    }
-  }, []);
-
+  // Effect for simulating student movement
   useEffect(() => {
     if (!isCollegeHours) {
-        setStudents(prev => prev.map(s => ({...s, status: 'safe'})));
-        return;
-    };
+      setStudents(prev => prev.map(s => ({ ...s, status: 'safe', lastStatusCheck: 'complete' })));
+      return;
+    }
 
     const interval = setInterval(() => {
       setStudents(prevStudents =>
         prevStudents.map(student => {
-          if (student.lastStatusCheck === 'pending') return student;
+          if (student.lastStatusCheck === 'pending') {
+            return student;
+          }
 
           // Simulate movement
           const newLocation = {
@@ -103,30 +122,37 @@ export function Dashboard() {
           const distance = haversineDistance(GEOFENCE.center, newLocation);
           const wasInside = student.status === 'safe';
           const isInside = distance <= GEOFENCE.radius;
-
           const wasBreached = student.status === 'breached';
           const isBreaching = distance > GEOFENCE.radius;
           
           let newEntryLogs = student.entryLogs;
           if (isInside && !wasInside) {
-              const newLog: EntryLog = { time: new Date().toLocaleString() };
-              newEntryLogs = [...student.entryLogs, newLog];
-              // Notify faculty here if needed
-              console.log(`Student ${student.name} entered the geofence.`);
+            const newLog: EntryLog = { time: new Date().toLocaleString() };
+            newEntryLogs = [...student.entryLogs, newLog];
+            console.log(`Student ${student.name} entered the geofence.`);
           }
 
+          let newStatus = student.status;
+          let breachDetails = student.breachDetails;
           if (isBreaching && !wasBreached) {
-            handleBreach({ ...student, location: newLocation, entryLogs: newEntryLogs });
-            return { ...student, location: newLocation, status: 'breached', lastStatusCheck: 'pending', entryLogs: newEntryLogs };
+            newStatus = 'breached';
+            breachDetails = {
+                time: new Date().toLocaleString(),
+                location: newLocation,
+                message: ''
+            }
+          } else if (isInside) {
+            newStatus = 'safe';
+            breachDetails = undefined;
           }
 
-          return { ...student, location: newLocation, status: isBreaching ? 'breached' : 'safe', lastStatusCheck: 'complete', entryLogs: newEntryLogs };
+          return { ...student, location: newLocation, status: newStatus, lastStatusCheck: 'complete', entryLogs: newEntryLogs, breachDetails };
         })
       );
     }, 5000); // Update every 5 seconds
 
     return () => clearInterval(interval);
-  }, [isCollegeHours, handleBreach]);
+  }, [isCollegeHours]);
   
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
