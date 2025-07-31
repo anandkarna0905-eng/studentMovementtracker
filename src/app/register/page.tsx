@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { LocateFixed, User, School, UserPlus } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { LocateFixed, User, School, UserPlus, Copy } from 'lucide-react';
 import Link from 'next/link';
 
 const formSchema = z.object({
@@ -21,10 +22,20 @@ const formSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
   role: z.enum(['student', 'teacher']),
+  teacherCode: z.string().optional(),
+}).refine(data => {
+    if (data.role === 'student') {
+        return !!data.teacherCode && data.teacherCode.length === 6;
+    }
+    return true;
+}, {
+    message: 'A valid 6-digit teacher code is required for students.',
+    path: ['teacherCode'],
 });
 
 export default function RegisterPage() {
   const [year, setYear] = useState<number | null>(null);
+  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -35,20 +46,42 @@ export default function RegisterPage() {
       email: '',
       password: '',
       role: 'student',
+      teacherCode: '',
     },
   });
+
+  const role = form.watch('role');
 
   useEffect(() => {
     setYear(new Date().getFullYear());
   }, []);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log('Registration successful:', values);
-    alert('Registration successful!');
-    router.push('/');
+    if (values.role === 'teacher') {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setGeneratedCode(code);
+      console.log('Teacher Registration successful:', values, 'Generated Code:', code);
+    } else {
+      console.log('Student Registration successful:', values);
+      alert('Registration successful!');
+      router.push('/');
+    }
   };
+  
+  const copyToClipboard = () => {
+    if (generatedCode) {
+      navigator.clipboard.writeText(generatedCode);
+      alert('Copied to clipboard!');
+    }
+  }
+  
+  const closeDialogAndRedirect = () => {
+    setGeneratedCode(null);
+    router.push('/');
+  }
 
   return (
+    <>
     <div className="flex flex-col min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground p-4 shadow-md sticky top-0 z-50">
         <div className="container mx-auto flex items-center gap-4">
@@ -68,6 +101,47 @@ export default function RegisterPage() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                 <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                        <FormItem className="space-y-3">
+                            <FormLabel>I am a...</FormLabel>
+                             <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="grid grid-cols-2 gap-4"
+                                >
+                                    <FormItem>
+                                        <FormControl>
+                                            <RadioGroupItem value="student" id="student" className="peer sr-only" />
+                                        </FormControl>
+                                        <Label
+                                            htmlFor="student"
+                                            className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                        >
+                                            <User className="mb-3 h-6 w-6" />
+                                            Student
+                                        </Label>
+                                    </FormItem>
+                                    <FormItem>
+                                         <FormControl>
+                                            <RadioGroupItem value="teacher" id="teacher" className="peer sr-only" />
+                                         </FormControl>
+                                        <Label
+                                            htmlFor="teacher"
+                                            className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                        >
+                                            <School className="mb-3 h-6 w-6" />
+                                            Teacher
+                                        </Label>
+                                    </FormItem>
+                                </RadioGroup>
+                             </FormControl>
+                        </FormItem>
+                    )}
+                />
                 <FormField
                   control={form.control}
                   name="name"
@@ -120,47 +194,22 @@ export default function RegisterPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                    control={form.control}
-                    name="role"
-                    render={({ field }) => (
-                        <FormItem className="space-y-3">
-                            <FormLabel>I am a...</FormLabel>
-                             <FormControl>
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    className="grid grid-cols-2 gap-4"
-                                >
-                                    <FormItem>
-                                        <FormControl>
-                                            <RadioGroupItem value="student" id="student" className="peer sr-only" />
-                                        </FormControl>
-                                        <Label
-                                            htmlFor="student"
-                                            className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                                        >
-                                            <User className="mb-3 h-6 w-6" />
-                                            Student
-                                        </Label>
-                                    </FormItem>
-                                    <FormItem>
-                                         <FormControl>
-                                            <RadioGroupItem value="teacher" id="teacher" className="peer sr-only" />
-                                         </FormControl>
-                                        <Label
-                                            htmlFor="teacher"
-                                            className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                                        >
-                                            <School className="mb-3 h-6 w-6" />
-                                            Teacher
-                                        </Label>
-                                    </FormItem>
-                                </RadioGroup>
-                             </FormControl>
-                        </FormItem>
-                    )}
-                />
+                {role === 'student' && (
+                    <FormField
+                        control={form.control}
+                        name="teacherCode"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Teacher Code</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Enter 6-digit code" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
+                
                 <Button type="submit" className="w-full font-bold">Create Account</Button>
               </form>
             </Form>
@@ -179,5 +228,32 @@ export default function RegisterPage() {
         </div>
       </footer>
     </div>
+
+    <Dialog open={!!generatedCode} onOpenChange={(open) => !open && closeDialogAndRedirect()}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle className="text-2xl font-headline">Registration Successful!</DialogTitle>
+                <DialogDescription>
+                    Here is your unique 6-digit teacher code. Please share this with your students so they can register under you.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+                <div 
+                    className="flex items-center justify-between rounded-lg border bg-muted p-4"
+                    onClick={copyToClipboard}
+                >
+                    <span className="font-mono text-2xl tracking-widest">{generatedCode}</span>
+                    <Button variant="ghost" size="icon">
+                        <Copy className="h-5 w-5" />
+                    </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">Click the code to copy it to your clipboard.</p>
+            </div>
+            <Button onClick={closeDialogAndRedirect} className="w-full">
+                Done
+            </Button>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }

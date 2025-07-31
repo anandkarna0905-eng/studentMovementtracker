@@ -14,12 +14,20 @@ export type Student = {
   status: 'safe' | 'breached' | 'unknown';
   lastStatusCheck: 'pending' | 'complete';
   entryLogs: EntryLog[];
+  teacherCode?: string;
   breachDetails?: {
     time: string;
     location: Location;
     message: string;
   };
 };
+
+export type Teacher = {
+    id: string;
+    name: string;
+    teacherCode: string;
+    students: Student[];
+}
 
 export type BreachAlert = {
   id: string;
