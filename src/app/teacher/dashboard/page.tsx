@@ -53,11 +53,15 @@ export default function TeacherDashboardPage() {
 
     useEffect(() => {
         setYear(new Date().getFullYear());
+    }, []);
+    
+    useEffect(() => {
         const today = new Date();
         if (!selectedMonth) {
             setSelectedMonth(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
         }
     }, [selectedMonth]);
+
 
     const studentsInside = students.filter(s => s.status === 'safe');
     const studentsOutside = students.filter(s => s.status === 'breached');
@@ -186,7 +190,7 @@ export default function TeacherDashboardPage() {
                                 </div>
                             </div>
                             <div>
-                                <Label>Your Teacher Code</Label>
+                                <Label htmlFor="teacher-code">Your Teacher Code</Label>
                                 <div 
                                     className="flex items-center justify-between rounded-lg border bg-muted p-3 mt-1 cursor-pointer"
                                     onClick={copyToClipboard}
@@ -212,7 +216,11 @@ export default function TeacherDashboardPage() {
                                         </CardTitle>
                                         <div className="flex items-center gap-2">
                                             <Button variant={viewMode === 'live' ? 'secondary' : 'outline'} size="sm" onClick={() => setViewMode('live')}>Live Status</Button>
-                                            <Button variant={viewMode === 'attendance' ? 'secondary' : 'outline'} size="sm" onClick={() => handleShowAttendance()}>Attendance</Button>
+                                            <Button variant={viewMode === 'attendance' ? 'secondary' : 'outline'} size="sm" onClick={() => {
+                                                if (viewMode !== 'attendance') {
+                                                    handleShowAttendance();
+                                                }
+                                            }}>Attendance</Button>
                                         </div>
                                     </div>
                                 </CardHeader>
@@ -423,3 +431,4 @@ export default function TeacherDashboardPage() {
     
 
     
+
