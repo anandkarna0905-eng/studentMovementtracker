@@ -48,12 +48,14 @@ export default function TeacherDashboardPage() {
     const [viewMode, setViewMode] = useState<'live' | 'attendance' | 'calendar'>('live');
     const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([]);
     const [workingDays, setWorkingDays] = useState<number>(22);
-    const [selectedMonth, setSelectedMonth] = useState<string>(`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`);
+    const [selectedMonth, setSelectedMonth] = useState<string>('');
 
 
     useEffect(() => {
         const currentYear = new Date().getFullYear();
         setYear(currentYear);
+        const today = new Date();
+        setSelectedMonth(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
     }, []);
 
     const studentsInside = students.filter(s => s.status === 'safe');
@@ -376,9 +378,9 @@ export default function TeacherDashboardPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="text-sm text-muted-foreground">
+                            <DialogDescription>
                                 History of when the student entered and exited the geofence. Total sessions: <Badge>{selectedStudent.entryLogs.length}</Badge>
-                            </div>
+                            </DialogDescription>
                         </DialogHeader>
                         <ScrollArea className="h-60 mt-4">
                             <div className="space-y-4 pr-4">
@@ -416,5 +418,7 @@ export default function TeacherDashboardPage() {
         </div>
     );
 }
+
+    
 
     
