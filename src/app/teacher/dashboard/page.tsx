@@ -42,7 +42,7 @@ type AttendanceData = {
 export default function TeacherDashboardPage() {
     const [teacher, setTeacher] = useState<Teacher>(MOCK_TEACHER);
     const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);
-    const [year, setYear] = useState<number | null>(null);
+    const [year, setYear] = useState(new Date().getFullYear());
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
     const [viewMode, setViewMode] = useState<'live' | 'attendance' | 'calendar'>('live');
@@ -52,11 +52,12 @@ export default function TeacherDashboardPage() {
 
 
     useEffect(() => {
-        const currentYear = new Date().getFullYear();
-        setYear(currentYear);
+        setYear(new Date().getFullYear());
         const today = new Date();
-        setSelectedMonth(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
-    }, []);
+        if (!selectedMonth) {
+            setSelectedMonth(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
+        }
+    }, [selectedMonth]);
 
     const studentsInside = students.filter(s => s.status === 'safe');
     const studentsOutside = students.filter(s => s.status === 'breached');
@@ -353,7 +354,7 @@ export default function TeacherDashboardPage() {
             </main>
             <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
                 <div className="container mx-auto">
-                    <p>&copy; {year || '...'} StudentMovementTracker. All rights reserved.</p>
+                    <p>&copy; {year} StudentMovementTracker. All rights reserved.</p>
                 </div>
             </footer>
              {selectedStudent && (
