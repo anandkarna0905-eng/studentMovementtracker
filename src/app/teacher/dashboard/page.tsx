@@ -53,9 +53,6 @@ export default function TeacherDashboardPage() {
 
     useEffect(() => {
         setYear(new Date().getFullYear());
-    }, []);
-    
-    useEffect(() => {
         const today = new Date();
         if (!selectedMonth) {
             setSelectedMonth(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
@@ -105,6 +102,11 @@ export default function TeacherDashboardPage() {
     const handleShowAttendance = () => {
         if (!workingDays || workingDays <= 0) {
             alert("Please enter a valid number of working days.");
+            return;
+        }
+
+        if (!selectedMonth) {
+            alert("Please select a month.");
             return;
         }
 
@@ -216,11 +218,7 @@ export default function TeacherDashboardPage() {
                                         </CardTitle>
                                         <div className="flex items-center gap-2">
                                             <Button variant={viewMode === 'live' ? 'secondary' : 'outline'} size="sm" onClick={() => setViewMode('live')}>Live Status</Button>
-                                            <Button variant={viewMode === 'attendance' ? 'secondary' : 'outline'} size="sm" onClick={() => {
-                                                if (viewMode !== 'attendance') {
-                                                    handleShowAttendance();
-                                                }
-                                            }}>Attendance</Button>
+                                            <Button variant={viewMode === 'attendance' ? 'secondary' : 'outline'} size="sm" onClick={() => setViewMode('attendance')}>Attendance</Button>
                                         </div>
                                     </div>
                                 </CardHeader>
@@ -432,3 +430,6 @@ export default function TeacherDashboardPage() {
 
     
 
+
+
+    
