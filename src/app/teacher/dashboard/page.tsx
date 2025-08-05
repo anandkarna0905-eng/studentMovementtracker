@@ -42,7 +42,7 @@ type AttendanceData = {
 export default function TeacherDashboardPage() {
     const [teacher, setTeacher] = useState<Teacher>(MOCK_TEACHER);
     const [students, setStudents] = useState<Student[]>(MOCK_STUDENTS);
-    const [year, setYear] = useState(new Date().getFullYear());
+    const [year, setYear] = useState<number | null>(null);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
     const [viewMode, setViewMode] = useState<'live' | 'calendar'>('live');
@@ -52,6 +52,7 @@ export default function TeacherDashboardPage() {
 
 
     useEffect(() => {
+        setYear(new Date().getFullYear());
         const today = new Date();
         const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         setSelectedMonth(currentMonth);
@@ -431,5 +432,3 @@ export default function TeacherDashboardPage() {
         </div>
     );
 }
-
-    
