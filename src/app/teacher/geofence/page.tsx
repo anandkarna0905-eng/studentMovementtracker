@@ -217,9 +217,11 @@ export default function GeofencePage() {
       </main>
        <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
         <div className="container mx-auto">
-            <p>&copy; {year ?? new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
+            <p>&copy; {year ?? ''} StudentMovementTracker. All rights reserved.</p>
         </div>
       </footer>
     </div>
   );
 }
+
+    

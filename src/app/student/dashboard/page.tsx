@@ -101,7 +101,7 @@ export default function StudentDashboardPage() {
                      <div className="lg:col-span-2">
                         <Card className="w-full mx-auto shadow-lg">
                             <CardHeader>
-                                <CardTitle className="text-xl font-headline font-semibold">Geofence Entry & Exit Log</CardTitle>
+                                <CardTitle className="text-xl font-headline font-semibold">Geofence Entry &amp; Exit Log</CardTitle>
                                 <CardDescription className="text-sm text-muted-foreground">
                                     Here is a record of all the times you have entered and exited the designated campus area. Total entries: <Badge>{student.entryLogs.length}</Badge>
                                 </CardDescription>
@@ -150,9 +150,11 @@ export default function StudentDashboardPage() {
             </main>
             <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
                 <div className="container mx-auto">
-                    <p>&copy; {year ?? new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
+                    <p>&copy; {year ?? ''} StudentMovementTracker. All rights reserved.</p>
                 </div>
             </footer>
         </div>
     );
 }
+
+    
