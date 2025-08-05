@@ -45,20 +45,22 @@ export default function TeacherDashboardPage() {
     const [year, setYear] = useState(new Date().getFullYear());
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-    const [viewMode, setViewMode] = useState<'live' | 'attendance' | 'calendar'>('live');
-    const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([]);
+    const [viewMode, setViewMode] = useState<'live' | 'calendar'>('live');
+    const [attendanceData, setAttendanceData] = useState<AttendanceData[] | null>(null);
     const [workingDays, setWorkingDays] = useState<number>(22);
     const [selectedMonth, setSelectedMonth] = useState<string>('');
 
 
     useEffect(() => {
-        setYear(new Date().getFullYear());
         const today = new Date();
-        if (!selectedMonth) {
-            setSelectedMonth(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
-        }
-    }, [selectedMonth]);
+        const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        setSelectedMonth(currentMonth);
+    }, []);
 
+    useEffect(() => {
+        // Reset attendance data if the month or working days change
+        setAttendanceData(null);
+    }, [selectedMonth, workingDays]);
 
     const studentsInside = students.filter(s => s.status === 'safe');
     const studentsOutside = students.filter(s => s.status === 'breached');
@@ -130,11 +132,10 @@ export default function TeacherDashboardPage() {
         });
         
         setAttendanceData(newAttendanceData);
-        setViewMode('attendance');
     };
     
     const getStudentAttendance = (studentId: string) => {
-        return attendanceData.find(data => data.studentId === studentId);
+        return attendanceData?.find(data => data.studentId === studentId);
     };
 
     const getMonthYearOptions = () => {
@@ -213,41 +214,46 @@ export default function TeacherDashboardPage() {
                                 <CardHeader>
                                     <div className="flex justify-between items-center">
                                          <CardTitle className="flex items-center gap-2 font-headline text-xl">
-                                            {viewMode === 'attendance' ? <BarChart /> : <Users />}
-                                            {viewMode === 'attendance' ? 'Monthly Attendance Report' : 'Student Status'}
+                                            <Users />
+                                            Student Status
                                         </CardTitle>
-                                        <div className="flex items-center gap-2">
-                                            <Button variant={viewMode === 'live' ? 'secondary' : 'outline'} size="sm" onClick={() => setViewMode('live')}>Live Status</Button>
-                                            <Button variant={viewMode === 'attendance' ? 'secondary' : 'outline'} size="sm" onClick={() => setViewMode('attendance')}>Attendance</Button>
-                                        </div>
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    {viewMode === 'live' && (
-                                        <>
-                                            <div className="mb-6">
-                                                <div className="font-semibold mb-2 text-muted-foreground">Students Inside Geofence ({studentsInside.length})</div>
-                                                <ScrollArea className="h-48 pr-4">
-                                                    <div className="space-y-4">
-                                                        {studentsInside.length > 0 ? studentsInside.map(student => (
-                                                            <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
-                                                        )) : <p className="text-muted-foreground text-center py-8">No students are currently inside the geofence.</p>}
-                                                    </div>
-                                                </ScrollArea>
+                                    <div className="mb-6">
+                                        <div className="font-semibold mb-2 text-muted-foreground">Students Inside Geofence ({studentsInside.length})</div>
+                                        <ScrollArea className="h-48 pr-4">
+                                            <div className="space-y-4">
+                                                {studentsInside.length > 0 ? studentsInside.map(student => (
+                                                    <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
+                                                )) : <p className="text-muted-foreground text-center py-8">No students are currently inside the geofence.</p>}
                                             </div>
-                                            <div>
-                                                <div className="font-semibold mb-2 text-muted-foreground">Students Outside Geofence ({studentsOutside.length})</div>
-                                                <ScrollArea className="h-48 pr-4">
-                                                    <div className="space-y-4">
-                                                        {studentsOutside.length > 0 ? studentsOutside.map(student => (
-                                                            <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
-                                                        )) : <p className="text-muted-foreground text-center py-8">All students are currently accounted for.</p>}
-                                                    </div>
-                                                </ScrollArea>
+                                        </ScrollArea>
+                                    </div>
+                                    <div>
+                                        <div className="font-semibold mb-2 text-muted-foreground">Students Outside Geofence ({studentsOutside.length})</div>
+                                        <ScrollArea className="h-48 pr-4">
+                                            <div className="space-y-4">
+                                                {studentsOutside.length > 0 ? studentsOutside.map(student => (
+                                                    <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
+                                                )) : <p className="text-muted-foreground text-center py-8">All students are currently accounted for.</p>}
                                             </div>
-                                        </>
-                                    )}
-                                     {viewMode === 'attendance' && (
+                                        </ScrollArea>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            {attendanceData && (
+                                <Card className="shadow-lg">
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2 font-headline text-xl">
+                                            <BarChart />
+                                            Monthly Attendance Report
+                                        </CardTitle>
+                                         <CardDescription>
+                                            Showing attendance for {getMonthYearOptions().find(o => o.value === selectedMonth)?.label} with {workingDays} working days.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
                                         <ScrollArea className="h-96 pr-4">
                                             <div className="space-y-4">
                                                 {students.map(student => (
@@ -261,9 +267,9 @@ export default function TeacherDashboardPage() {
                                                 ))}
                                             </div>
                                         </ScrollArea>
-                                    )}
-                                </CardContent>
-                            </Card>
+                                    </CardContent>
+                                </Card>
+                            )}
                         </div>
                         <div className="lg:col-span-1 flex flex-col gap-8">
                              <Card className="shadow-lg">
@@ -425,11 +431,5 @@ export default function TeacherDashboardPage() {
         </div>
     );
 }
-
-    
-
-    
-
-
 
     
