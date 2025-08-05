@@ -83,8 +83,6 @@ export default function GeofencePage() {
     setCurrentGeofence(INITIAL_GEOFENCE);
   }
 
-  if (year === null) return null;
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground p-4 shadow-md sticky top-0 z-50">
@@ -219,7 +217,7 @@ export default function GeofencePage() {
       </main>
        <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
         <div className="container mx-auto">
-            <p>&copy; {year} StudentMovementTracker. All rights reserved.</p>
+            <p>&copy; {year ?? new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
         </div>
       </footer>
     </div>

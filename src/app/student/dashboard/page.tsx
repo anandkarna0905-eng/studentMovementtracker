@@ -36,8 +36,7 @@ export default function StudentDashboardPage() {
     const [year, setYear] = useState<number | null>(null);
 
     useEffect(() => {
-        const currentYear = new Date().getFullYear();
-        setYear(currentYear);
+        setYear(new Date().getFullYear());
         // In a real app, you'd fetch the student's data here.
     }, []);
     
@@ -151,10 +150,9 @@ export default function StudentDashboardPage() {
             </main>
             <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
                 <div className="container mx-auto">
-                    <p>&copy; {year || '...'} StudentMovementTracker. All rights reserved.</p>
+                    <p>&copy; {year ?? new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
                 </div>
             </footer>
         </div>
     );
 }
-
