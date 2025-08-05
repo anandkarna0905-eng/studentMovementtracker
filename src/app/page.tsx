@@ -12,10 +12,11 @@ import Link from 'next/link';
 
 export default function LoginPage() {
   const [role, setRole] = useState<'student' | 'teacher'>('student');
-  const [year, setYear] = useState<number | null>(null);
+  const [year, setYear] = useState(new Date().getFullYear());
   const router = useRouter();
 
   useEffect(() => {
+    // Keep this effect to ensure the year is updated if the app runs across a year-change without a full reload.
     setYear(new Date().getFullYear());
   }, []);
 
