@@ -12,11 +12,10 @@ import Link from 'next/link';
 
 export default function LoginPage() {
   const [role, setRole] = useState<'student' | 'teacher'>('student');
-  const [year, setYear] = useState(new Date().getFullYear());
+  const [year, setYear] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Keep this effect to ensure the year is updated if the app runs across a year-change without a full reload.
     setYear(new Date().getFullYear());
   }, []);
 
@@ -81,7 +80,7 @@ export default function LoginPage() {
         </main>
         <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
             <div className="container mx-auto">
-                 <p>&copy; {year} StudentMovementTracker. All rights reserved.</p>
+                 <p>&copy; {year ?? new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
             </div>
       </footer>
     </div>
