@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,13 +19,13 @@ export default function LoginPage() {
     setYear(new Date().getFullYear());
   }, []);
 
-  const handleLogin = () => {
+  const handleLogin = useCallback(() => {
     if (role === 'student') {
       router.push('/student/dashboard');
     } else {
       router.push('/teacher/dashboard');
     }
-  };
+  }, [role, router]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
