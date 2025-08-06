@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,12 +12,7 @@ import Link from 'next/link';
 
 export default function LoginPage() {
   const [role, setRole] = useState<'student' | 'teacher'>('student');
-  const [year, setYear] = useState<number | null>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    setYear(new Date().getFullYear());
-  }, []);
 
   const handleLogin = useCallback(() => {
     if (role === 'student') {
@@ -80,7 +75,7 @@ export default function LoginPage() {
         </main>
         <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
             <div className="container mx-auto">
-                 <p>&copy; {year ?? new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
+                 <p>&copy; {new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
             </div>
       </footer>
     </div>
