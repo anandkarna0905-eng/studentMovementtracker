@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,16 +11,21 @@ import { LocateFixed, User, School } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [role, setRole] = useState<'student' | 'teacher'>('teacher');
+  const [role, setRole] = useState<'student' | 'teacher'>('student');
+  const [year, setYear] = useState<number | null>(null);
   const router = useRouter();
 
-  const handleLogin = useCallback(() => {
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
+  const handleLogin = () => {
     if (role === 'student') {
       router.push('/student/dashboard');
     } else {
       router.push('/teacher/dashboard');
     }
-  }, [role, router]);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -75,7 +80,7 @@ export default function LoginPage() {
         </main>
         <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
             <div className="container mx-auto">
-                 <p>&copy; {new Date().getFullYear()} StudentMovementTracker. All rights reserved.</p>
+                 <p>&copy; {year ?? ''} StudentMovementTracker. All rights reserved.</p>
             </div>
       </footer>
     </div>
