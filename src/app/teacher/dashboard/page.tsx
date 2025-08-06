@@ -10,11 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { StudentCard } from '@/components/student-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Users, CheckCircle, AlertTriangle, Settings, X, Mail, Phone, Copy, LogIn, LogOut as LogOutIcon, BarChart } from 'lucide-react';
+import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Users, Settings, X, Mail, Phone, Copy, LogIn, LogOut as LogOutIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 
 // Mock data, in a real app this would come from a backend.
 const MOCK_TEACHER: Teacher = {
@@ -33,11 +31,6 @@ const MOCK_STUDENTS: Student[] = [
     { id: 'STU-004', name: 'Diana Miller', email: 'diana@example.com', phone: '+14444444444', location: { lat: 34.0530, lng: -118.2430 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ entryTime: '2023-10-26T09:05:15' }, { entryTime: '2023-10-27T09:01:22' }, { entryTime: '2023-10-28T08:59:58' }, { entryTime: '2023-11-01T09:05:15' }, { entryTime: '2023-11-02T09:01:22' }, { entryTime: '2023-11-03T08:59:58' }, { entryTime: '2023-11-04T09:05:15' }, { entryTime: '2023-11-05T09:01:22' }, { entryTime: '2023-11-06T08:59:58' }, { entryTime: '2023-11-07T09:05:15' }, { entryTime: '2023-11-08T09:01:22' }, { entryTime: '2023-11-09T08:59:58' }, { entryTime: '2023-11-10T09:05:15' }, { entryTime: '2023-11-11T09:01:22' }, { entryTime: '2023-11-12T08:59:58' }, { entryTime: '2023-11-13T09:05:15' }, { entryTime: '2023-11-14T09:01:22' }, { entryTime: '2023-11-15T08:59:58' }, { entryTime: '2023-11-16T09:01:22' }, { entryTime: '2023-11-17T08:59:58' }, { entryTime: '2023-11-18T09:01:22' }] },
 ];
 
-type AttendanceData = {
-    studentId: string;
-    attendedDays: number;
-    attendancePercentage: number;
-};
 
 export default function TeacherDashboardPage() {
     const [teacher, setTeacher] = useState<Teacher>(MOCK_TEACHER);
@@ -46,22 +39,10 @@ export default function TeacherDashboardPage() {
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
     const [viewMode, setViewMode] = useState<'live' | 'calendar'>('live');
-    const [attendanceData, setAttendanceData] = useState<AttendanceData[] | null>(null);
-    const [workingDays, setWorkingDays] = useState<number>(22);
-    const [selectedMonth, setSelectedMonth] = useState<string>('');
-
 
     useEffect(() => {
         setYear(new Date().getFullYear());
-        const today = new Date();
-        const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-        setSelectedMonth(currentMonth);
     }, []);
-
-    useEffect(() => {
-        // Reset attendance data if the month or working days change
-        setAttendanceData(null);
-    }, [selectedMonth, workingDays]);
 
     const studentsInside = students.filter(s => s.status === 'safe');
     const studentsOutside = students.filter(s => s.status === 'breached');
@@ -101,55 +82,6 @@ export default function TeacherDashboardPage() {
           alert('Copied to clipboard!');
         }
     }
-    
-    const handleShowAttendance = () => {
-        if (!workingDays || workingDays <= 0) {
-            alert("Please enter a valid number of working days.");
-            return;
-        }
-
-        if (!selectedMonth) {
-            alert("Please select a month.");
-            return;
-        }
-
-        const [year, month] = selectedMonth.split('-').map(Number);
-
-        const newAttendanceData = students.map(student => {
-            const attendedDaysInMonth = new Set(
-                student.entryLogs
-                    .map(log => new Date(log.entryTime))
-                    .filter(date => date.getFullYear() === year && date.getMonth() === month - 1)
-                    .map(date => date.toDateString())
-            ).size;
-            
-            const attendancePercentage = Math.round((attendedDaysInMonth / workingDays) * 100);
-
-            return {
-                studentId: student.id,
-                attendedDays: attendedDaysInMonth,
-                attendancePercentage: attendancePercentage > 100 ? 100 : attendancePercentage,
-            };
-        });
-        
-        setAttendanceData(newAttendanceData);
-    };
-    
-    const getStudentAttendance = (studentId: string) => {
-        return attendanceData?.find(data => data.studentId === studentId);
-    };
-
-    const getMonthYearOptions = () => {
-        const options = [];
-        const today = new Date();
-        for (let i = 0; i < 12; i++) {
-            const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-            const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            const label = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-            options.push({ value, label });
-        }
-        return options;
-    };
     
     return (
         <div className="flex flex-col min-h-screen bg-background">
@@ -243,75 +175,8 @@ export default function TeacherDashboardPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                            {attendanceData && (
-                                <Card className="shadow-lg">
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2 font-headline text-xl">
-                                            <BarChart />
-                                            Monthly Attendance Report
-                                        </CardTitle>
-                                         <CardDescription>
-                                            Showing attendance for {getMonthYearOptions().find(o => o.value === selectedMonth)?.label} with {workingDays} working days.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <ScrollArea className="h-96 pr-4">
-                                            <div className="space-y-4">
-                                                {students.map(student => (
-                                                    <StudentCard 
-                                                        key={student.id} 
-                                                        student={student} 
-                                                        onClick={() => handleStudentCardClick(student)}
-                                                        attendanceData={getStudentAttendance(student.id)}
-                                                        workingDays={workingDays}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </ScrollArea>
-                                    </CardContent>
-                                </Card>
-                            )}
                         </div>
                         <div className="lg:col-span-1 flex flex-col gap-8">
-                             <Card className="shadow-lg">
-                                <CardHeader>
-                                    <CardTitle className="flex items-center justify-between gap-2 font-headline text-xl">
-                                        <div className="flex items-center gap-2">
-                                            <BarChart />
-                                            Attendance Calculator
-                                        </div>
-                                    </CardTitle>
-                                    <CardDescription>Select a month and enter working days to see the attendance report.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="month-select">Month</Label>
-                                        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                                            <SelectTrigger id="month-select">
-                                                <SelectValue placeholder="Select a month" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {getMonthYearOptions().map(option => (
-                                                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                     <div>
-                                        <Label htmlFor="working-days">Total Working Days</Label>
-                                        <Input 
-                                            id="working-days"
-                                            type="number"
-                                            value={workingDays}
-                                            onChange={(e) => setWorkingDays(Number(e.target.value))}
-                                            placeholder="e.g., 22"
-                                        />
-                                    </div>
-                                    <Button onClick={handleShowAttendance} className="w-full">
-                                        Show Report
-                                    </Button>
-                                </CardContent>
-                            </Card>
                             <Card className="shadow-lg">
                                 <CardHeader>
                                     <CardTitle className="flex items-center justify-between gap-2 font-headline text-xl">
@@ -321,7 +186,7 @@ export default function TeacherDashboardPage() {
                                         </div>
                                         {selectedDate && <Button variant="ghost" size="icon" onClick={() => { setSelectedDate(undefined); setViewMode('live'); }}><X className="h-4 w-4"/></Button>}
                                     </CardTitle>
-                                    <CardDescription>Select a day to see who was present or absent.</CardDescription>
+                                    <CardDescription>Select a day to see who was present or absent. Days with entries are highlighted.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="flex justify-center">
                                     <Calendar
@@ -432,5 +297,3 @@ export default function TeacherDashboardPage() {
         </div>
     );
 }
-
-    
