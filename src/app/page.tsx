@@ -11,7 +11,7 @@ import { LocateFixed, User, School } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [role, setRole] = useState<'student' | 'teacher'>('student');
+  const [role, setRole] = useState<'student' | 'teacher'>('teacher');
   const router = useRouter();
 
   const handleLogin = useCallback(() => {
