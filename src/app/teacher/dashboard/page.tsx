@@ -10,9 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { StudentCard } from '@/components/student-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Users, Settings, X, Mail, Phone, Copy, LogIn, LogOut as LogOutIcon } from 'lucide-react';
+import { LocateFixed, User, LogOut, Calendar as CalendarIcon, Users, Settings, X, Mail, Phone, Copy, LogIn, LogOut as LogOutIcon, BarChart } from 'lucide-react';
 import Link from 'next/link';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
 
 // Mock data, in a real app this would come from a backend.
 const MOCK_TEACHER: Teacher = {
@@ -31,6 +33,11 @@ const MOCK_STUDENTS: Student[] = [
     { id: 'STU-004', name: 'Diana Miller', email: 'diana@example.com', phone: '+14444444444', location: { lat: 34.0530, lng: -118.2430 }, status: 'safe', lastStatusCheck: 'complete', entryLogs: [{ entryTime: '2023-10-26T09:05:15' }, { entryTime: '2023-10-27T09:01:22' }, { entryTime: '2023-10-28T08:59:58' }, { entryTime: '2023-11-01T09:05:15' }, { entryTime: '2023-11-02T09:01:22' }, { entryTime: '2023-11-03T08:59:58' }, { entryTime: '2023-11-04T09:05:15' }, { entryTime: '2023-11-05T09:01:22' }, { entryTime: '2023-11-06T08:59:58' }, { entryTime: '2023-11-07T09:05:15' }, { entryTime: '2023-11-08T09:01:22' }, { entryTime: '2023-11-09T08:59:58' }, { entryTime: '2023-11-10T09:05:15' }, { entryTime: '2023-11-11T09:01:22' }, { entryTime: '2023-11-12T08:59:58' }, { entryTime: '2023-11-13T09:05:15' }, { entryTime: '2023-11-14T09:01:22' }, { entryTime: '2023-11-15T08:59:58' }, { entryTime: '2023-11-16T09:01:22' }, { entryTime: '2023-11-17T08:59:58' }, { entryTime: '2023-11-18T09:01:22' }] },
 ];
 
+type AttendanceReport = {
+    studentId: string;
+    studentName: string;
+    daysPresent: number;
+}[];
 
 export default function TeacherDashboardPage() {
     const [teacher, setTeacher] = useState<Teacher>(MOCK_TEACHER);
@@ -40,6 +47,10 @@ export default function TeacherDashboardPage() {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
     const [viewMode, setViewMode] = useState<'live' | 'calendar'>('live');
 
+    const [selectedMonth, setSelectedMonth] = useState<string>( (new Date().getMonth() + 1).toString());
+    const [attendanceReport, setAttendanceReport] = useState<AttendanceReport | null>(null);
+    const [reportMonth, setReportMonth] = useState<string>('');
+    
     useEffect(() => {
         setYear(new Date().getFullYear());
     }, []);
@@ -83,6 +94,35 @@ export default function TeacherDashboardPage() {
         }
     }
     
+    const handleShowAttendance = () => {
+        const month = parseInt(selectedMonth, 10);
+        const currentYear = new Date().getFullYear();
+
+        const report = students.map(student => {
+            const presentDates = new Set<string>();
+            student.entryLogs.forEach(log => {
+                const logDate = new Date(log.entryTime);
+                if (logDate.getFullYear() === currentYear && (logDate.getMonth() + 1) === month) {
+                    presentDates.add(logDate.toDateString());
+                }
+            });
+            return {
+                studentId: student.id,
+                studentName: student.name,
+                daysPresent: presentDates.size,
+            };
+        });
+
+        setAttendanceReport(report);
+        const monthName = new Date(currentYear, month - 1).toLocaleString('default', { month: 'long' });
+        setReportMonth(`${monthName} ${currentYear}`);
+    };
+    
+    const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+        value: (i + 1).toString(),
+        label: new Date(0, i).toLocaleString('default', { month: 'long' }),
+    }));
+
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <header className="bg-primary text-primary-foreground p-4 shadow-md sticky top-0 z-50">
@@ -175,6 +215,30 @@ export default function TeacherDashboardPage() {
                                     </div>
                                 </CardContent>
                             </Card>
+                            {attendanceReport && (
+                                <Card className="shadow-lg">
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2 font-headline text-xl">
+                                            <BarChart />
+                                            Monthly Attendance Report ({reportMonth})
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <ScrollArea className="h-64 pr-4">
+                                            <div className="space-y-2">
+                                                {attendanceReport.map(report => (
+                                                    <div key={report.studentId} className="flex justify-between items-center p-2 rounded-md bg-muted/50">
+                                                        <span className="font-medium">{report.studentName}</span>
+                                                        <span className="text-sm font-mono text-muted-foreground">
+                                                            Present: <span className="font-semibold text-foreground">{report.daysPresent} days</span>
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </ScrollArea>
+                                    </CardContent>
+                                </Card>
+                            )}
                         </div>
                         <div className="lg:col-span-1 flex flex-col gap-8">
                             <Card className="shadow-lg">
@@ -203,6 +267,35 @@ export default function TeacherDashboardPage() {
                                     />
                                 </CardContent>
                             </Card>
+                            
+                             <Card className="shadow-lg">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2 font-headline text-xl">
+                                        <BarChart />
+                                        Attendance Report
+                                    </CardTitle>
+                                    <CardDescription>Select a month to generate an attendance report.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <Label htmlFor="month-select">Month</Label>
+                                        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                                            <SelectTrigger id="month-select">
+                                                <SelectValue placeholder="Select month" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {monthOptions.map(option => (
+                                                    <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <Button onClick={handleShowAttendance} className="w-full">
+                                        Show Report
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                            
                              {viewMode === 'calendar' && selectedDate && (
                                 <Card className="shadow-lg">
                                     <CardHeader>
