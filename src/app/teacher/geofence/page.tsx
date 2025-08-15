@@ -14,6 +14,7 @@ import type { Geofence } from '@/types';
 import { LocateFixed, LogOut, ArrowLeft, Trash2, Edit, PlusCircle, RefreshCw, X } from 'lucide-react';
 import Link from 'next/link';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 const INITIAL_GEOFENCE: Geofence = {
   id: 'new',
@@ -236,5 +237,3 @@ export default function GeofencePage() {
     </div>
   );
 }
-
-    
