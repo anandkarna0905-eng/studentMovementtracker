@@ -11,8 +11,9 @@ import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { Circle } from '@/components/circle';
 import { Pin } from '@/components/pin';
 import type { Geofence } from '@/types';
-import { LocateFixed, LogOut, ArrowLeft, Trash2, Edit, PlusCircle } from 'lucide-react';
+import { LocateFixed, LogOut, ArrowLeft, Trash2, Edit, PlusCircle, RefreshCw, X } from 'lucide-react';
 import Link from 'next/link';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const INITIAL_GEOFENCE: Geofence = {
   id: 'new',
@@ -39,6 +40,17 @@ export default function GeofencePage() {
   const handleSelectLocation = (location: Geofence) => {
     setCurrentGeofence(location);
   };
+  
+  const handleReset = () => {
+    if(currentGeofence.id !== 'new') {
+        const originalLocation = MOCK_SAVED_LOCATIONS.find(l => l.id === currentGeofence.id);
+        if(originalLocation) {
+            setCurrentGeofence(originalLocation);
+        }
+    } else {
+        setCurrentGeofence(INITIAL_GEOFENCE);
+    }
+  }
 
   const handleRadiusChange = (value: number[]) => {
     setCurrentGeofence(g => ({ ...g, radius: value[0] }));
@@ -101,119 +113,120 @@ export default function GeofencePage() {
             </Link>
         </div>
       </header>
-       <main className="flex-grow container mx-auto p-4 md:p-8">
-        <Link href="/teacher/dashboard" className="inline-flex items-center gap-2 mb-4 text-sm font-medium text-primary hover:underline">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-        </Link>
-
-        <Card className="mb-8 shadow-lg">
+       <main className="flex-grow container mx-auto p-4 md:p-8 flex items-center justify-center">
+        <Card className="w-full max-w-6xl shadow-2xl">
             <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                    Saved Locations
-                    <Button variant="outline" size="sm" onClick={handleAddNew}>
-                        <PlusCircle className="mr-2 h-4 w-4"/>
-                        Add New
-                    </Button>
-                </CardTitle>
-                <CardDescription>
-                    Manage your saved geofence locations. Select one to edit or view it on the map.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="space-y-4">
-                    {savedLocations.map(location => (
-                        <Card key={location.id} className={`flex items-center justify-between p-4 ${currentGeofence.id === location.id ? 'border-primary' : ''}`}>
-                            <div>
-                                <h3 className="font-semibold">{location.name}</h3>
-                                <p className="text-sm text-muted-foreground">Radius: {location.radius}m</p>
-                            </div>
-                            <div className="flex gap-2">
-                                <Button variant="outline" size="icon" onClick={() => handleSelectLocation(location)}>
-                                    <Edit className="h-4 w-4"/>
-                                    <span className="sr-only">Edit</span>
-                                </Button>
-                                <Button variant="destructive" size="icon" onClick={() => handleDelete(location.id)}>
-                                    <Trash2 className="h-4 w-4"/>
-                                    <span className="sr-only">Delete</span>
-                                </Button>
-                            </div>
-                        </Card>
-                    ))}
-                    {savedLocations.length === 0 && (
-                        <p className="text-muted-foreground text-center py-4">No saved locations yet.</p>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 h-[60vh] lg:h-auto">
-                {apiKey ? (
-                    <APIProvider apiKey={apiKey}>
-                        <Map
-                            center={currentGeofence.center}
-                            zoom={15}
-                            mapId="geofence-map"
-                            className="w-full h-full rounded-lg shadow-lg"
-                            gestureHandling={'greedy'}
-                            disableDefaultUI={true}
-                            onClick={handleCenterChange}
-                        >
-                            <Circle
-                                center={currentGeofence.center}
-                                radius={currentGeofence.radius}
-                                strokeColor="hsl(var(--accent))"
-                                strokeOpacity={0.8}
-                                strokeWeight={2}
-                                fillColor="hsl(var(--accent))"
-                                fillOpacity={0.25}
-                            />
-                             <AdvancedMarker position={currentGeofence.center} title={'Geofence Center'}>
-                                 <Pin
-                                    background={'hsl(var(--accent))'}
-                                    borderColor={'hsl(var(--accent-foreground))'}
-                                    glyphColor={'hsl(var(--accent-foreground))'}
-                                 />
-                            </AdvancedMarker>
-                        </Map>
-                    </APIProvider>
-                ) : (
-                    <div className="flex items-center justify-center h-full bg-muted rounded-lg">
-                        <p className="text-muted-foreground">Google Maps API Key is missing.</p>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle className="text-2xl font-headline">Setup Boundaries</CardTitle>
+                        <CardDescription className="mt-1">Add, remove, and edit geofence boundaries for the campus. Click 'Add Boundary' to create one and 'Reset' to undo changes.</CardDescription>
                     </div>
-                )}
-            </div>
-            <div className="lg:col-span-1">
-                <Card className="shadow-lg">
-                    <CardHeader>
-                        <CardTitle className="font-headline text-xl">{currentGeofence.id === 'new' ? 'Add New Geofence' : `Editing: ${currentGeofence.name}`}</CardTitle>
-                        <CardDescription>Click on the map to set the center point. Then, provide a name and adjust the radius below.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
+                     <Link href="/teacher/dashboard" passHref>
+                        <Button variant="ghost" size="icon">
+                            <X className="h-5 w-5"/>
+                        </Button>
+                    </Link>
+                </div>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-1 space-y-6">
+                    <div className="flex gap-2">
+                        <Button onClick={handleAddNew} className="w-full"><PlusCircle className="mr-2 h-4 w-4"/> Add Boundary</Button>
+                        <Button onClick={handleReset} variant="outline" className="w-full"><RefreshCw className="mr-2 h-4 w-4"/> Reset Changes</Button>
+                    </div>
+
+                    <ScrollArea className="h-40 border rounded-md p-2">
+                        <div className="space-y-2">
+                             {savedLocations.map(location => (
+                                <div key={location.id}
+                                    onClick={() => handleSelectLocation(location)}
+                                    className={cn("flex items-center justify-between p-2 rounded-md cursor-pointer hover:bg-muted",
+                                    currentGeofence.id === location.id ? 'bg-muted border border-primary' : ''
+                                    )}
+                                >
+                                    <span className="font-medium text-sm">{location.name}</span>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={(e) => { e.stopPropagation(); handleDelete(location.id); }}>
+                                        <Trash2 className="h-4 w-4"/>
+                                    </Button>
+                                </div>
+                             ))}
+                             {savedLocations.length === 0 && (
+                                <p className="text-muted-foreground text-center py-4 text-sm">No saved locations yet.</p>
+                            )}
+                        </div>
+                    </ScrollArea>
+                    
+                    <div className="space-y-4">
                          <div className="space-y-2">
-                            <Label htmlFor="name">Location Name</Label>
+                            <Label htmlFor="name">Boundary Name</Label>
                             <Input id="name" type="text" value={currentGeofence.name} onChange={handleNameChange} placeholder="e.g., Main Campus" />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="radius">Radius (meters)</Label>
-                            <div className="flex items-center gap-4">
-                                <Slider
-                                    id="radius"
-                                    min={50}
-                                    max={1000}
-                                    step={10}
-                                    value={[currentGeofence.radius]}
-                                    onValueChange={handleRadiusChange}
-                                />
-                                <span className="font-mono text-lg w-24 text-center p-2 rounded-md bg-muted">{currentGeofence.radius}m</span>
+                            <Label htmlFor="radius">Radius: {currentGeofence.radius}m</Label>
+                            <Slider
+                                id="radius"
+                                min={50}
+                                max={1000}
+                                step={10}
+                                value={[currentGeofence.radius]}
+                                onValueChange={handleRadiusChange}
+                            />
+                        </div>
+                         <div className="space-y-2">
+                            <Label>Center</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <Input value={currentGeofence.center.lat.toFixed(6)} readOnly placeholder="Latitude"/>
+                                <Input value={currentGeofence.center.lng.toFixed(6)} readOnly placeholder="Longitude"/>
                             </div>
                         </div>
-                         <Button onClick={handleSave} className="w-full font-bold">{currentGeofence.id === 'new' ? 'Save New Location' : 'Update Location'}</Button>
-                    </CardContent>
-                </Card>
+                    </div>
+                    
+                </div>
+                 <div className="md:col-span-2 h-[50vh] md:h-auto rounded-lg overflow-hidden">
+                    {apiKey ? (
+                        <APIProvider apiKey={apiKey}>
+                            <Map
+                                center={currentGeofence.center}
+                                zoom={15}
+                                mapId="geofence-map"
+                                className="w-full h-full"
+                                gestureHandling={'greedy'}
+                                disableDefaultUI={true}
+                                onClick={handleCenterChange}
+                            >
+                                <Circle
+                                    center={currentGeofence.center}
+                                    radius={currentGeofence.radius}
+                                    strokeColor="hsl(var(--primary))"
+                                    strokeOpacity={0.8}
+                                    strokeWeight={2}
+                                    fillColor="hsl(var(--primary))"
+                                    fillOpacity={0.25}
+                                />
+                                <AdvancedMarker position={currentGeofence.center} title={'Geofence Center'}>
+                                    <Pin
+                                        background={'hsl(var(--primary))'}
+                                        borderColor={'hsl(var(--primary-foreground))'}
+                                        glyphColor={'hsl(var(--primary-foreground))'}
+                                    />
+                                </AdvancedMarker>
+                            </Map>
+                        </APIProvider>
+                    ) : (
+                        <div className="flex items-center justify-center h-full bg-muted rounded-lg p-4">
+                            <div className="text-center text-sm text-destructive">
+                                <h3 className="font-semibold">Error: AuthFailure</h3>
+                                <p className="mt-1 text-muted-foreground">A problem with your API key prevents the map from rendering correctly. Please make sure the value of the APIProvider.apiKey prop is correct. Check the error-message in the console for further details.</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </CardContent>
+            <div className="flex justify-end gap-2 p-6 pt-0">
+                <Link href="/teacher/dashboard" passHref><Button variant="outline">Cancel</Button></Link>
+                <Button onClick={handleSave}>Save Changes</Button>
             </div>
-        </div>
+        </Card>
       </main>
        <footer className="bg-muted text-muted-foreground p-4 text-center text-sm">
         <div className="container mx-auto">
