@@ -42,17 +42,6 @@ export default function GeofencePage() {
     setCurrentGeofence(location);
   };
   
-  const handleReset = () => {
-    if(currentGeofence.id !== 'new') {
-        const originalLocation = MOCK_SAVED_LOCATIONS.find(l => l.id === currentGeofence.id);
-        if(originalLocation) {
-            setCurrentGeofence(originalLocation);
-        }
-    } else {
-        setCurrentGeofence(INITIAL_GEOFENCE);
-    }
-  }
-
   const handleRadiusChange = (value: number[]) => {
     setCurrentGeofence(g => ({ ...g, radius: value[0] }));
   };
@@ -83,7 +72,8 @@ export default function GeofencePage() {
     setCurrentGeofence(INITIAL_GEOFENCE);
   };
   
-  const handleDelete = (locationId: string) => {
+  const handleDelete = (e: React.MouseEvent, locationId: string) => {
+    e.stopPropagation();
     if (confirm('Are you sure you want to delete this location?')) {
         setSavedLocations(prev => prev.filter(loc => loc.id !== locationId));
         if (currentGeofence.id === locationId) {
@@ -120,11 +110,12 @@ export default function GeofencePage() {
                 <div className="flex justify-between items-start">
                     <div>
                         <CardTitle className="text-2xl font-headline">Setup Boundaries</CardTitle>
-                        <CardDescription className="mt-1">Add, remove, and edit geofence boundaries for the campus. Click 'Add Boundary' to create one and 'Reset' to undo changes.</CardDescription>
+                        <CardDescription className="mt-1">Add, remove, and edit geofence boundaries for the campus.</CardDescription>
                     </div>
                      <Link href="/teacher/dashboard" passHref>
-                        <Button variant="ghost" size="icon">
-                            <X className="h-5 w-5"/>
+                        <Button>
+                            <ArrowLeft className="mr-2 h-4 w-4"/>
+                            Return to Dashboard
                         </Button>
                     </Link>
                 </div>
@@ -133,7 +124,6 @@ export default function GeofencePage() {
                 <div className="md:col-span-1 space-y-6">
                     <div className="flex gap-2">
                         <Button onClick={handleAddNew} className="w-full"><PlusCircle className="mr-2 h-4 w-4"/> Add Boundary</Button>
-                        <Button onClick={handleReset} variant="outline" className="w-full"><RefreshCw className="mr-2 h-4 w-4"/> Reset Changes</Button>
                     </div>
 
                     <ScrollArea className="h-40 border rounded-md p-2">
@@ -146,7 +136,7 @@ export default function GeofencePage() {
                                     )}
                                 >
                                     <span className="font-medium text-sm">{location.name}</span>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={(e) => { e.stopPropagation(); handleDelete(location.id); }}>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={(e) => handleDelete(e, location.id)}>
                                         <Trash2 className="h-4 w-4"/>
                                     </Button>
                                 </div>
