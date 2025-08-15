@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { LocateFixed, User, School, UserPlus, Copy } from 'lucide-react';
 import Link from 'next/link';
+import { store, addTeacher, addStudent } from '@/lib/store';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -25,7 +26,9 @@ const formSchema = z.object({
   teacherCode: z.string().optional(),
 }).refine(data => {
     if (data.role === 'student') {
-        return !!data.teacherCode && data.teacherCode.length === 6;
+        const teachers = store.get().teachers;
+        const codeIsValid = teachers.some(t => t.teacherCode === data.teacherCode);
+        return !!data.teacherCode && data.teacherCode.length === 6 && codeIsValid;
     }
     return true;
 }, {
@@ -59,12 +62,34 @@ export default function RegisterPage() {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (values.role === 'teacher') {
       const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const newTeacher = {
+        id: `TCH-${Date.now()}`,
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        teacherCode: code,
+        students: [],
+      };
+      addTeacher(newTeacher);
       setGeneratedCode(code);
-      console.log('Teacher Registration successful:', values, 'Generated Code:', code);
     } else {
-      console.log('Student Registration successful:', values);
-      alert('Registration successful!');
-      router.push('/');
+        const teacher = store.get().teachers.find(t => t.teacherCode === values.teacherCode);
+        if (teacher) {
+            const newStudent = {
+                id: `STU-${Date.now()}`,
+                name: values.name,
+                email: values.email,
+                phone: values.phone,
+                location: { lat: 34.0522 + (Math.random() - 0.5) * 0.01, lng: -118.2437 + (Math.random() - 0.5) * 0.01 },
+                status: 'safe',
+                lastStatusCheck: 'complete',
+                entryLogs: [],
+                teacher: { name: teacher.name, phone: teacher.phone },
+            };
+            addStudent(newStudent, teacher.id);
+            alert('Student registration successful!');
+            router.push('/');
+        }
     }
   };
   
