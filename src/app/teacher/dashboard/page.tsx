@@ -118,21 +118,21 @@ export default function TeacherDashboardPage() {
         <div className="flex flex-col min-h-screen bg-background">
             <header className="bg-primary text-primary-foreground p-4 shadow-md sticky top-0 z-50">
                 <div className="container mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <LocateFixed className="h-8 w-8" />
-                        <h1 className="text-2xl font-headline font-bold">Teacher Dashboard</h1>
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <LocateFixed className="h-7 w-7 sm:h-8 sm:w-8" />
+                        <h1 className="text-xl sm:text-2xl font-headline font-bold">Teacher Dashboard</h1>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2">
                         <Link href="/teacher/geofence" passHref>
-                            <Button variant="secondary" className="font-bold">
-                                <Settings className="mr-2 h-4 w-4" />
-                                Geofence Settings
+                            <Button variant="secondary" size="sm" className="font-bold">
+                                <Settings className="h-4 w-4 md:mr-2" />
+                                <span className="hidden md:inline">Geofence Settings</span>
                             </Button>
                         </Link>
                         <Link href="/" passHref>
-                            <Button variant="secondary" className="font-bold">
-                                <LogOut className="mr-2 h-4 w-4" />
-                                Logout
+                            <Button variant="secondary" size="sm" className="font-bold">
+                                <LogOut className="h-4 w-4 md:mr-2" />
+                                <span className="hidden md:inline">Logout</span>
                             </Button>
                         </Link>
                     </div>
@@ -159,12 +159,12 @@ export default function TeacherDashboardPage() {
                             <div>
                                 <Label htmlFor="teacher-code">Your Teacher Code</Label>
                                 <div 
-                                    className="flex items-center justify-between rounded-lg border bg-muted p-3 mt-1 cursor-pointer"
+                                    className="flex items-center justify-between rounded-lg border bg-muted p-2 md:p-3 mt-1 cursor-pointer"
                                     onClick={copyToClipboard}
                                 >
-                                    <span className="font-mono text-xl tracking-widest">{teacher.teacherCode}</span>
-                                    <Button variant="ghost" size="icon">
-                                        <Copy className="h-5 w-5" />
+                                    <span className="font-mono text-lg md:text-xl tracking-widest">{teacher.teacherCode}</span>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <Copy className="h-4 w-4 md:h-5 md:w-5" />
                                     </Button>
                                 </div>
                                  <p className="text-xs text-muted-foreground mt-2">Click the code to copy it.</p>
@@ -172,8 +172,8 @@ export default function TeacherDashboardPage() {
                         </CardContent>
                     </Card>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 flex flex-col gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="md:col-span-2 lg:col-span-2 flex flex-col gap-8">
                              <Card className="shadow-lg">
                                 <CardHeader>
                                     <div className="flex justify-between items-center">
@@ -186,8 +186,8 @@ export default function TeacherDashboardPage() {
                                 <CardContent>
                                     <div className="mb-6">
                                         <div className="font-semibold mb-2 text-muted-foreground">Students Inside Geofence ({studentsInside.length})</div>
-                                        <ScrollArea className="h-48 pr-4">
-                                            <div className="space-y-4">
+                                        <ScrollArea className="h-48 w-full whitespace-nowrap">
+                                            <div className="space-y-4 pr-4">
                                                 {studentsInside.length > 0 ? studentsInside.map(student => (
                                                     <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
                                                 )) : <p className="text-muted-foreground text-center py-8">No students are currently inside the geofence.</p>}
@@ -196,8 +196,8 @@ export default function TeacherDashboardPage() {
                                     </div>
                                     <div>
                                         <div className="font-semibold mb-2 text-muted-foreground">Students Outside Geofence ({studentsOutside.length})</div>
-                                        <ScrollArea className="h-48 pr-4">
-                                            <div className="space-y-4">
+                                        <ScrollArea className="h-48 w-full whitespace-nowrap">
+                                            <div className="space-y-4 pr-4">
                                                 {studentsOutside.length > 0 ? studentsOutside.map(student => (
                                                     <StudentCard key={student.id} student={student} onClick={() => handleStudentCardClick(student)} />
                                                 )) : <p className="text-muted-foreground text-center py-8">All students are currently accounted for.</p>}
@@ -254,7 +254,7 @@ export default function TeacherDashboardPage() {
                                         modifiersClassNames={{
                                             entries: 'bg-primary/20',
                                         }}
-                                        className="rounded-md border"
+                                        className="rounded-md border p-0 sm:p-3"
                                     />
                                 </CardContent>
                             </Card>
