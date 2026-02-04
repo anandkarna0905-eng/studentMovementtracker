@@ -11,7 +11,7 @@ import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { Circle } from '@/components/circle';
 import { Pin } from '@/components/pin';
 import type { Geofence } from '@/types';
-import { LocateFixed, LogOut, ArrowLeft, Trash2, Edit, PlusCircle, RefreshCw, X } from 'lucide-react';
+import { LocateFixed, LogOut, ArrowLeft, Trash2, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -85,6 +85,8 @@ export default function GeofencePage() {
   const handleAddNew = () => {
     setCurrentGeofence(INITIAL_GEOFENCE);
   }
+  
+  const isApiKeyValid = apiKey && apiKey !== 'YOUR_API_KEY_HERE';
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -174,7 +176,7 @@ export default function GeofencePage() {
                     
                 </div>
                  <div className="md:col-span-2 h-[50vh] md:h-auto rounded-lg overflow-hidden">
-                    {apiKey ? (
+                    {isApiKeyValid ? (
                         <APIProvider apiKey={apiKey}>
                             <Map
                                 center={currentGeofence.center}
@@ -206,8 +208,8 @@ export default function GeofencePage() {
                     ) : (
                         <div className="flex items-center justify-center h-full bg-muted rounded-lg p-4">
                             <div className="text-center text-sm text-destructive">
-                                <h3 className="font-semibold">Error: AuthFailure</h3>
-                                <p className="mt-1 text-muted-foreground">A problem with your API key prevents the map from rendering correctly. Please make sure the value of the APIProvider.apiKey prop is correct. Check the error-message in the console for further details.</p>
+                                <h3 className="font-semibold">Google Maps API Error</h3>
+                                <p className="mt-1 text-muted-foreground">Your API key is either missing or invalid. Please add a valid `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` to your `.env` file and restart the application.</p>
                             </div>
                         </div>
                     )}
